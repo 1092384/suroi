@@ -303,7 +303,7 @@ export class Game {
                 }
 
                 // Regenerate health
-                player.health += player.adrenaline * 0.00039;
+                player.health += player.adrenaline * 0.000391;
 
                 // Shoot gun/use melee
                 if (player.startedAttacking) {
