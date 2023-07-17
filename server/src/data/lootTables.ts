@@ -4,9 +4,19 @@ export type WeightedItem = WeightedLoot | WeightedTier;
 export interface LootTable { min: number, max: number, loot: WeightedItem[] }
 
 export const LootTables: Record<string, LootTable> = {
+    ground_loot: {
+        min: 1,
+        max: 1,
+        loot: [
+            { tier: "equipment", weight: 1 },
+            { tier: "healing_items", weight: 1 },
+            { tier: "ammo", weight: 1 },
+            { tier: "guns", weight: 0.9 }
+        ]
+    },
     regular_crate: {
         min: 1,
-        max: 2,
+        max: 1,
         loot: [
             { tier: "guns", weight: 1.25 },
             { tier: "equipment", weight: 1 },
@@ -16,8 +26,8 @@ export const LootTables: Record<string, LootTable> = {
         ]
     },
     aegis_crate: {
-        min: 5,
-        max: 6,
+        min: 3,
+        max: 5,
         loot: [
             { tier: "special_guns", weight: 1 },
             { tier: "special_healing_items", weight: 0.85 },
@@ -25,8 +35,8 @@ export const LootTables: Record<string, LootTable> = {
         ]
     },
     flint_crate: {
-        min: 5,
-        max: 6,
+        min: 3,
+        max: 5,
         loot: [
             { tier: "special_guns", weight: 1 },
             { tier: "special_equipment", weight: 0.65 },
@@ -34,16 +44,16 @@ export const LootTables: Record<string, LootTable> = {
         ]
     },
     cola_crate: {
-        min: 3,
-        max: 5,
+        min: 2,
+        max: 3,
         loot: [
             { item: "cola", weight: 1 },
             { item: "tablets", weight: 0.25 }
         ]
     },
     gauze_crate: {
-        min: 3,
-        max: 5,
+        min: 2,
+        max: 3,
         loot: [
             { item: "gauze", weight: 1, count: 5 },
             { item: "medikit", weight: 0.25, count: 1 }
@@ -62,6 +72,14 @@ export const LootTables: Record<string, LootTable> = {
         loot: [
             { item: "mosin", weight: 1 },
             { item: "tango_51", weight: 0.1 }
+        ]
+    },
+    blueberry_bush: {
+        min: 1,
+        max: 1,
+        loot: [
+            { tier: "equipment", weight: 1 },
+            { tier: "healing_items", weight: 1 }
         ]
     }
 };
@@ -103,9 +121,9 @@ export const LootTiers: Record<string, WeightedLoot[]> = {
         { item: "tactical_backpack", weight: 0.1 },
 
         { item: "2x_scope", weight: 1 },
-        { item: "4x_scope", weight: 0.4 },
+        { item: "4x_scope", weight: 0.5 },
         { item: "8x_scope", weight: 0.1 },
-        { item: "15x_scope", weight: 0.05 }
+        { item: "15x_scope", weight: 0.02 }
     ],
     ammo: [
         { item: "12g", count: 10, weight: 0.75 },

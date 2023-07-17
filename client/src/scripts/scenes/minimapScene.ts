@@ -8,7 +8,6 @@ import { MAP_HEIGHT, MAP_WIDTH } from "../../../../common/src/constants";
 
 export class MinimapScene extends Phaser.Scene {
     playerIndicator!: Phaser.GameObjects.Image;
-    playerIndicatorDead = false;
     isExpanded!: boolean;
     visible = true;
 
@@ -19,6 +18,8 @@ export class MinimapScene extends Phaser.Scene {
     gasToCenterLine!: Phaser.GameObjects.Line;
 
     renderTexture!: Phaser.GameObjects.RenderTexture;
+
+    fullScreenCamera!: Phaser.Cameras.Scene2D.Camera;
 
     constructor() {
         super("minimap");
@@ -31,8 +32,6 @@ export class MinimapScene extends Phaser.Scene {
     create(): void {
         this.scene.bringToTop();
 
-        this.playerIndicatorDead = false;
-
         this.renderTexture = this.add.renderTexture(0, 0, MINIMAP_GRID_WIDTH, MINIMAP_GRID_HEIGHT).setOrigin(0, 0);
 
         // Create gas rectangle and mask
@@ -41,15 +40,17 @@ export class MinimapScene extends Phaser.Scene {
         this.gasNewPosCircle = this.add.circle(0, 0, 0).setStrokeStyle(3, 0xffffff).setDepth(15);
         this.gasToCenterLine = this.add.line(0, 0, 0, 0, 0, 0).setStrokeStyle(12, 0x00ffff).setDepth(14);
 
+        this.fullScreenCamera = this.cameras.add();
+
         this.gasRect = this.add.rectangle(MAP_WIDTH / 2 * MINIMAP_SCALE,
             MAP_HEIGHT / 2 * MINIMAP_SCALE,
-            (MAP_WIDTH * 1.2) * MINIMAP_SCALE,
-            (MAP_HEIGHT * 1.3) * MINIMAP_SCALE,
+            (MAP_WIDTH * 1.5) * MINIMAP_SCALE,
+            (MAP_HEIGHT * 1.5) * MINIMAP_SCALE,
             GAS_COLOR, GAS_ALPHA).setDepth(10).setMask(this.gasMask);
 
         this.scale.on("resize", (): void => {
-            if (this.isExpanded) this.resizeBigMap();
-            else this.resizeSmallMap();
+            this.resizeBigMap();
+            this.resizeSmallMap();
         });
 
         if (core.game?.playerManager.isMobile) {
@@ -58,7 +59,7 @@ export class MinimapScene extends Phaser.Scene {
                 minimapElement.addEventListener("click", () => { this.toggle(); });
             }
             // Using mousedown instead of pointerdown because we don't want to close the minimap if the user decides to move around while having it open
-            onmousedown = (e: MouseEvent): void => {
+            onmousedown = () => {
                 if (this.isExpanded) this.toggle();
             };
         }
@@ -86,14 +87,14 @@ export class MinimapScene extends Phaser.Scene {
     }
 
     resizeBigMap(): void {
-        if (this.cameras.main === undefined) return;
+        if (this.fullScreenCamera === undefined) return;
         const screenWidth = window.innerWidth;
         const screenHeight = window.innerHeight;
-        this.cameras.main.setZoom((0.85 * screenHeight) / (MAP_HEIGHT * MINIMAP_SCALE));
+        this.fullScreenCamera.setZoom((0.85 * screenHeight) / (MAP_HEIGHT * MINIMAP_SCALE));
         // noinspection JSSuspiciousNameCombination
-        this.cameras.main.setSize(screenHeight, screenHeight);
-        this.cameras.main.setPosition(screenWidth / 2 - screenHeight / 2, 0);
-        this.cameras.main.centerOn(MAP_WIDTH / 2 * MINIMAP_SCALE, (MAP_HEIGHT * 1.1) / 2 * MINIMAP_SCALE);
+        this.fullScreenCamera.setSize(screenHeight, screenHeight);
+        this.fullScreenCamera.setPosition(screenWidth / 2 - screenHeight / 2, 0);
+        this.fullScreenCamera.centerOn(MAP_WIDTH / 2 * MINIMAP_SCALE, (MAP_HEIGHT * 1.1) / 2 * MINIMAP_SCALE);
         $("#scopes-container").hide();
         this.updateTransparency();
     }
@@ -116,26 +117,28 @@ export class MinimapScene extends Phaser.Scene {
     }
 
     switchToBigMap(): void {
-        if (this.cameras.main === undefined) return;
-        this.cameras.main.setVisible(true);
+        if (this.cameras.main === undefined || this.fullScreenCamera === undefined) return;
+        this.fullScreenCamera.setVisible(true);
         this.isExpanded = true;
-        this.cameras.main.stopFollow();
         this.resizeBigMap();
+        this.cameras.main.setVisible(false);
         $("#minimap-border").hide();
     }
 
     switchToSmallMap(): void {
-        if (this.cameras.main === undefined) return;
+        if (this.cameras.main === undefined || this.fullScreenCamera === undefined) return;
         this.isExpanded = false;
+        this.fullScreenCamera.setVisible(false);
         this.cameras.main.setVisible(this.visible);
         this.resizeSmallMap();
         $("#minimap-border").toggle(this.visible);
     }
 
     updateTransparency(): void {
-        if (this.cameras.main === undefined) return;
-        const alpha = this.isExpanded ? localStorageInstance.config.bigMapTransparency : localStorageInstance.config.minimapTransparency;
-        this.cameras.main.setBackgroundColor({ ...GRASS_RGB, a: alpha * 255 });
-        this.cameras.main.setAlpha(alpha);
+        if (this.cameras.main === undefined || this.fullScreenCamera === undefined) return;
+        this.cameras.main.setBackgroundColor({ ...GRASS_RGB, a: localStorageInstance.config.minimapTransparency * 255 });
+        this.cameras.main.setAlpha(localStorageInstance.config.minimapTransparency);
+        this.fullScreenCamera.setBackgroundColor({ ...GRASS_RGB, a: localStorageInstance.config.bigMapTransparency * 255 });
+        this.fullScreenCamera.setAlpha(localStorageInstance.config.bigMapTransparency);
     }
 }

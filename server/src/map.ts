@@ -14,11 +14,13 @@ import {
 import { Obstacles, type ObstacleDefinition } from "../../common/src/definitions/obstacles";
 import { CircleHitbox, type Hitbox } from "../../common/src/utils/hitbox";
 import { Obstacle } from "./objects/obstacle";
-import { MAP_HEIGHT, MAP_WIDTH, ObjectCategory } from "../../common/src/constants";
+import { MAP_HEIGHT, MAP_WIDTH, ObjectCategory, PLAYER_RADIUS } from "../../common/src/constants";
 import { Config, SpawnMode } from "./config";
 import { Box, Vec2 } from "planck";
 import { Scopes } from "../../common/src/definitions/scopes";
 import { Loots } from "../../common/src/definitions/loots";
+import { getLootTableLoot } from "./utils/misc";
+import { LootTables } from "./data/lootTables";
 
 export class Map {
     game: Game;
@@ -42,17 +44,21 @@ export class Map {
             this.generateObstacles("oak_tree", 140);
             this.generateObstacles("pine_tree", 12);
             this.generateObstacles("birch_tree", 16);
-            this.generateObstacles("rock", 150);
+            this.generateObstacles("rock", 140);
             this.generateObstacles("bush", 85);
-            this.generateObstacles("regular_crate", 160);
-            this.generateObstacles("aegis_crate", 6);
-            this.generateObstacles("flint_crate", 6);
+            this.generateObstacles("blueberry_bush", 20);
+            this.generateObstacles("regular_crate", 120);
+            this.generateObstacles("aegis_crate", random(3, 4));
+            this.generateObstacles("flint_crate", random(3, 4));
             this.generateObstacles("barrel", 70);
             this.generateObstacles("super_barrel", 20);
-            this.generateObstacles("gauze_crate", 5);
-            this.generateObstacles("cola_crate", 5);
-            this.generateObstacles("melee_crate", 5);
+            this.generateObstacles("gauze_crate", 1);
+            this.generateObstacles("cola_crate", 1);
+            this.generateObstacles("melee_crate", 1);
             this.generateObstacles("gold_rock", 1);
+
+            // ground loot
+            this.generateLoots("ground_loot", 40);
         } else {
             // Obstacle debug code goes here
 
@@ -177,6 +183,25 @@ export class Map {
         return obstacle;
     }
 
+    private generateLoots(table: string, count: number): void {
+        if (LootTables[table] === undefined) {
+            throw new Error(`Unknown Loot Table: ${table}`);
+        }
+
+        for (let i = 0; i < count; i++) {
+            const loot = getLootTableLoot(LootTables[table].loot);
+
+            const position = this.getRandomPositionFor(ObjectType.categoryOnly(ObjectCategory.Loot));
+
+            for (const item of loot) {
+                this.game.addLoot(
+                    ObjectType.fromString(ObjectCategory.Loot, item.idString),
+                    position,
+                    item.count);
+            }
+        }
+    }
+
     getRandomPositionFor(type: ObjectType, scale = 1): Vector {
         let collided = true;
         let position: Vector = v(0, 0);
@@ -184,18 +209,28 @@ export class Map {
         let initialHitbox: Hitbox | undefined;
 
         // Set up the hitbox
-        if (type.category === ObjectCategory.Obstacle) {
-            const definition: ObstacleDefinition = type.definition as ObstacleDefinition;
-            initialHitbox = definition.spawnHitbox ?? definition.hitbox;
-        } else if (type.category === ObjectCategory.Player) {
-            initialHitbox = new CircleHitbox(2.5);
+        switch (type.category) {
+            case ObjectCategory.Obstacle: {
+                const definition: ObstacleDefinition = type.definition as ObstacleDefinition;
+                initialHitbox = definition.spawnHitbox ?? definition.hitbox;
+                break;
+            }
+            case ObjectCategory.Player: {
+                initialHitbox = new CircleHitbox(PLAYER_RADIUS);
+                break;
+            }
+            case ObjectCategory.Loot: {
+                initialHitbox = new CircleHitbox(5);
+            }
         }
+
         if (initialHitbox === undefined) {
             throw new Error(`Unsupported object category: ${type.category}`);
         }
 
         let getPosition: () => Vector;
-        if (type.category === ObjectCategory.Obstacle || (type.category === ObjectCategory.Player && Config.spawn.mode === SpawnMode.Random)) {
+        if (type.category === ObjectCategory.Obstacle || type.category === ObjectCategory.Loot ||
+             (type.category === ObjectCategory.Player && Config.spawn.mode === SpawnMode.Random)) {
             getPosition = (): Vector => randomVector(12, this.width - 12, 12, this.height - 12);
         } else if (type.category === ObjectCategory.Player && Config.spawn.mode === SpawnMode.Radius) {
             const spawn = Config.spawn as { readonly mode: SpawnMode.Radius, readonly position: Vec2, readonly radius: number };
@@ -238,12 +273,21 @@ export class Map {
             radius = Math.min(this.width, this.height);
         }
         // Set up the hitbox
-        if (type.category === ObjectCategory.Obstacle) {
-            const definition: ObstacleDefinition = type.definition as ObstacleDefinition;
-            initialHitbox = definition.spawnHitbox ?? definition.hitbox;
-        } else if (type.category === ObjectCategory.Player) {
-            initialHitbox = new CircleHitbox(2.5);
+        switch (type.category) {
+            case ObjectCategory.Obstacle: {
+                const definition: ObstacleDefinition = type.definition as ObstacleDefinition;
+                initialHitbox = definition.spawnHitbox ?? definition.hitbox;
+                break;
+            }
+            case ObjectCategory.Player: {
+                initialHitbox = new CircleHitbox(PLAYER_RADIUS);
+                break;
+            }
+            case ObjectCategory.Loot: {
+                initialHitbox = new CircleHitbox(5);
+            }
         }
+
         if (initialHitbox === undefined) {
             throw new Error(`Unsupported object category: ${type.category}`);
         }
