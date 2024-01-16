@@ -1357,8 +1357,8 @@ const GunsRaw: RawGunDefinition[] = [
         name: "Fort-17",
         itemType: ItemType.Gun,
         ammoType: "9mm",
-        ammoSpawnAmount: 60,
-        capacity: 15,
+        ammoSpawnAmount: 56,
+        capacity: 14,
         reloadTime: 1.2,
         switchDelay: 250,
         fireDelay: 140,
@@ -1390,7 +1390,7 @@ const GunsRaw: RawGunDefinition[] = [
             fireDelay: 120,
             shotSpread: 8,
             moveSpread: 12,
-            capacity: 30,
+            capacity: 28,
             reloadTime: 2.4
         }
     },
