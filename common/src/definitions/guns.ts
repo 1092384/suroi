@@ -1248,6 +1248,153 @@ const GunsRaw: RawGunDefinition[] = [
         }
     },
 
+    // OG weapons
+
+    {
+        idString: "pkp",
+        name: "PKP Pecheneg",
+        itemType: ItemType.Gun,
+        ammoType: "762mm",
+        ammoSpawnAmount: 200,
+        capacity: 200,
+        reloadTime: 5,
+        switchDelay: 750,
+        fireDelay: 100,
+        ballistics: {
+            damage: 18,
+            obstacleMultiplier: 2,
+            range: 200 * 2.25,
+            speed: 0.27
+        },
+        fireMode: FireMode.Auto,
+        fists: {
+            left: Vec.create(130, -3),
+            right: Vec.create(40, 0),
+            rightZIndex: 4,
+            animationDuration: 100
+        },
+        image: {
+            position: Vec.create(110, 0)
+        },
+        shotSpread: 2.5,
+        moveSpread: 10,
+        length: 8.9,
+        recoilDuration: 175,
+        recoilMultiplier: 0.7,
+        speedMultiplier: 0.9
+    },
+
+    {
+        idString: "bar",
+        name: "BAR M1918",
+        itemType: ItemType.Gun,
+        ammoType: "762mm",
+        ammoSpawnAmount: 80,
+        capacity: 20,
+        reloadTime: 2.7,
+        switchDelay: 750,
+        fireDelay: 120,
+        ballistics: {
+            damage: 17.5,
+            obstacleMultiplier: 2,
+            range: 275 * 2.25,
+            speed: 0.2565
+        },
+        fireMode: FireMode.Auto,
+        fists: {
+            left: Vec.create(105, -3),
+            right: Vec.create(40, 0),
+            rightZIndex: 4,
+            animationDuration: 100
+        },
+        image: {
+            position: Vec.create(100, 0)
+        },
+        shotSpread: 2,
+        moveSpread: 10,
+        length: 8.5,
+        recoilDuration: 175,
+        recoilMultiplier: 0.7,
+        speedMultiplier: 0.9
+    },
+
+    {
+        idString: "m249",
+        name: "M249",
+        itemType: ItemType.Gun,
+        ammoType: "556mm",
+        ammoSpawnAmount: 200,
+        capacity: 100,
+        reloadTime: 6.7,
+        switchDelay: 750,
+        fireDelay: 80,
+        ballistics: {
+            damage: 14,
+            obstacleMultiplier: 2,
+            range: 220 * 2.25,
+            speed: 0.28125
+        },
+        fireMode: FireMode.Auto,
+        fists: {
+            left: Vec.create(105, -3),
+            right: Vec.create(40, 0),
+            rightZIndex: 4,
+            animationDuration: 100
+        },
+        image: {
+            position: Vec.create(100, 0)
+        },
+        shotSpread: 1.5,
+        moveSpread: 7.5,
+        length: 8.5,
+        recoilDuration: 175,
+        recoilMultiplier: 0.7,
+        speedMultiplier: 0.9
+    },
+
+    {
+        idString: "fort_17",
+        name: "Fort-17",
+        itemType: ItemType.Gun,
+        ammoType: "9mm",
+        ammoSpawnAmount: 60,
+        capacity: 15,
+        reloadTime: 1.2,
+        switchDelay: 250,
+        fireDelay: 140,
+        ballistics: {
+            damage: 21,
+            obstacleMultiplier: 1,
+            range: 220 * 2.25,
+            speed: 0.28125
+        },
+        fireMode: FireMode.Single,
+        fists: {
+            left: Vec.create(40, 0),
+            right: Vec.create(40, 0),
+            rightZIndex: 4,
+            leftZIndex: 4,
+            animationDuration: 250
+        },
+        image: {
+            position: Vec.create(65, 0)
+        },
+        shotSpread: 2,
+        moveSpread: 6.5,
+        length: 5.2,
+        speedMultiplier: 0.92,
+        recoilMultiplier: 0.8,
+        recoilDuration: 90,
+        dual: {
+            leftRightOffset: 1.3,
+            fireDelay: 120,
+            shotSpread: 8,
+            moveSpread: 12,
+            capacity: 30,
+            reloadTime: 2.4
+        }
+    },
+
     // only event weapons below this point
 
     {

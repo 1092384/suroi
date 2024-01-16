@@ -97,7 +97,7 @@ export const Maps: Record<string, MapDefinition> = {
             flint_stone: 1
         },
         loots: {
-            ground_loot: 60
+            ground_loot: 600
         },
         places: [
             { name: "Banana", position: Vec.create(0.23, 0.2) },

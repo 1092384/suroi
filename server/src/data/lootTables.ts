@@ -27,7 +27,7 @@ export const LootTables: Record<string, LootTable> = {
             { tier: "equipment", weight: 1 },
             { tier: "healing_items", weight: 1 },
             { tier: "ammo", weight: 1 },
-            { tier: "guns", weight: 0.9 },
+            { tier: "guns", weight: 100 },
             { tier: "scopes", weight: 0.3 }
         ]
     },
@@ -410,29 +410,11 @@ export const LootTables: Record<string, LootTable> = {
 
 export const LootTiers: Record<string, WeightedItem[]> = {
     guns: [
-        { item: "g19", weight: 2 },
-        { item: "m1895", weight: 1.75 },
-        { item: "mp40", weight: 1.7 },
-        { item: "saf_200", weight: 1.5 },
-        { item: "cz75a", weight: 1.5 },
-        { item: "hp18", weight: 1.25 },
-        { item: "micro_uzi", weight: 1 },
-        { item: "ak47", weight: 1 },
-        { item: "model_37", weight: 0.95 },
-        { item: "aug", weight: 0.7 },
-        { item: "m3k", weight: 0.3 },
-        { item: "m16a4", weight: 0.1 },
-        { item: "arx160", weight: 0.1 },
-        { item: "flues", weight: 0.1 },
-        { item: "lewis_gun", weight: 0.05 },
-        { item: "vss", weight: 0.02 },
-        { item: "sr25", weight: 0.01 },
-        { item: "mini14", weight: 0.01 },
-        { item: "mcx_spear", weight: 0.01 },
-        { item: "stoner_63", weight: 0.005 },
-        { item: "radio", weight: 0.005 },
-        { item: "mosin", weight: 0.005 },
-        { item: "tango_51", weight: 0.002 }
+        { item: "g19", weight: 10 },
+        { item: "fort_17", weight: 10 },
+        { item: "m249", weight: 10 },
+        { item: "pkp", weight: 10 },
+        { item: "tactical_pack", weight: 10 }
     ],
     healing_items: [
         { item: "gauze", count: 5, weight: 3 },
