@@ -1353,6 +1353,40 @@ const GunsRaw: RawGunDefinition[] = [
     },
 
     {
+        idString: "m134",
+        name: "M134",
+        itemType: ItemType.Gun,
+        ammoType: "762mm",
+        ammoSpawnAmount: 200,
+        capacity: 200,
+        reloadTime: 8,
+        switchDelay: 900,
+        fireDelay: 55,
+        ballistics: {
+            damage: 10,
+            obstacleMultiplier: 2,
+            range: 200 * 2.25,
+            speed: 0.2925
+        },
+        fireMode: FireMode.Auto,
+        fists: {
+            left: Vec.create(105, -3),
+            right: Vec.create(40, 0),
+            rightZIndex: 4,
+            animationDuration: 100
+        },
+        image: {
+            position: Vec.create(100, 0)
+        },
+        shotSpread: 1,
+        moveSpread: 2,
+        length: 10.79,
+        recoilDuration: 175,
+        recoilMultiplier: 0.25,
+        speedMultiplier: 0.75
+    },
+
+    {
         idString: "fort_17",
         name: "Fort-17",
         itemType: ItemType.Gun,
