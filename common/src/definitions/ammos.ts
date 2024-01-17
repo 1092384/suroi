@@ -53,6 +53,13 @@ export const Ammos = new ObjectDefinitions<AmmoDefinition>([
         maxStackSize: 10,
         hideUnlessPresent: true
     },
+    {
+        idString: "45acp",
+        name: ".45 ACP",
+        itemType: ItemType.Ammo,
+        maxStackSize: 60,
+        hideUnlessPresent: true
+    },
     /*
     {
         idString: "50ae",
