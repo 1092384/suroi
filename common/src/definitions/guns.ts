@@ -1248,6 +1248,51 @@ const GunsRaw: RawGunDefinition[] = [
         }
     },
 
+    // .45 ACP
+
+    {
+        idString: "rsh_12",
+        name: "RSh-12",
+        itemType: ItemType.Gun,
+        ammoType: "127mm",
+        ammoSpawnAmount: 24,
+        capacity: 6,
+        reloadTime: 2.4,
+        switchDelay: 440,
+        fireDelay: 440,
+        ballistics: {
+            damage: 38,
+            obstacleMultiplier: 1,
+            range: 150,
+            speed: 0.25
+        },
+        fireMode: FireMode.Single,
+        fists: {
+            left: Vec.create(40, 0),
+            right: Vec.create(40, 0),
+            rightZIndex: 4,
+            leftZIndex: 4,
+            animationDuration: 250
+        },
+        image: {
+            position: Vec.create(70, 0)
+        },
+        shotSpread: 4,
+        moveSpread: 10,
+        length: 6,
+        speedMultiplier: 0.92,
+        recoilMultiplier: 0.6,
+        recoilDuration: 150,
+        dual: {
+            leftRightOffset: 1.25,
+            fireDelay: 370,
+            shotSpread: 6,
+            moveSpread: 12,
+            capacity: 24,
+            reloadTime: 2.4 * 2
+        }
+    },
+
     // OG weapons
 
     {
@@ -1385,6 +1430,8 @@ const GunsRaw: RawGunDefinition[] = [
         recoilMultiplier: 0.25,
         speedMultiplier: 0.75
     },
+
+    // Ukraine GUn
 
     {
         idString: "fort_17",
