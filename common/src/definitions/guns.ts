@@ -1415,23 +1415,33 @@ const GunsRaw: RawGunDefinition[] = [
         },
         fireMode: FireMode.Auto,
         fists: {
-            left: Vec.create(105, -3),
-            right: Vec.create(40, 0),
+            left: Vec.create(105, 0),
+            right: Vec.create(40, 3),
             rightZIndex: 4,
-            animationDuration: 100
+            leftZIndex: 4,
+            animationDuration: 120
         },
         image: {
-            position: Vec.create(100, 0)
+            position: Vec.create(120, 0)
         },
         shotSpread: 1,
         moveSpread: 2,
         length: 10.79,
         recoilDuration: 175,
         recoilMultiplier: 0.25,
-        speedMultiplier: 0.75
+        speedMultiplier: 0.75,
+        casingParticles: {
+            position: Vec.create(5, 0.6),
+            velocity: {
+                y: {
+                    min: 4,
+                    max: 15
+                }
+            }
+        }
     },
 
-    // Ukraine GUn
+    // Ukraine Gun
 
     {
         idString: "fort_17",
