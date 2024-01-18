@@ -1255,8 +1255,8 @@ const GunsRaw: RawGunDefinition[] = [
         name: "RSh-12",
         itemType: ItemType.Gun,
         ammoType: "127mm",
-        ammoSpawnAmount: 24,
-        capacity: 6,
+        ammoSpawnAmount: 13 * 4,
+        capacity: 13,
         reloadTime: 2.4,
         switchDelay: 440,
         fireDelay: 440,
@@ -1288,7 +1288,7 @@ const GunsRaw: RawGunDefinition[] = [
             fireDelay: 370,
             shotSpread: 6,
             moveSpread: 12,
-            capacity: 24,
+            capacity: 13 * 2,
             reloadTime: 2.4 * 2
         }
     },
