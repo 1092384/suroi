@@ -1248,8 +1248,6 @@ const GunsRaw: RawGunDefinition[] = [
         }
     },
 
-    // .45 ACP
-
     {
         idString: "rsh_12",
         name: "RSh-12",
@@ -1483,6 +1481,51 @@ const GunsRaw: RawGunDefinition[] = [
             moveSpread: 12,
             capacity: 24,
             reloadTime: 2.4
+        }
+    },
+
+    // .45 ACP
+
+    {
+        idString: "model_94",
+        name: "Model 94",
+        itemType: ItemType.Gun,
+        ammoType: "45acp",
+        ammoSpawnAmount: 64,
+        capacity: 8,
+        reloadTime: 0.5,
+        singleReload: true,
+        fireDelay: 700,
+        switchDelay: 1000,
+        speedMultiplier: 0.92,
+        recoilMultiplier: 0.45,
+        recoilDuration: 750,
+        fireMode: FireMode.Single,
+        shotSpread: 1.5,
+        moveSpread: 4.5,
+        length: 8.7,
+        shootOnRelease: true,
+        fists: {
+            left: Vec.create(113, 0),
+            right: Vec.create(40, 0),
+            rightZIndex: 4,
+            animationDuration: 100
+        },
+        image: { position: Vec.create(90, 0) },
+        casingParticles: {
+            position: Vec.create(4, 0.6),
+            ejectionDelay: 500
+        },
+        ballistics: {
+            damage: 44,
+            obstacleMultiplier: 1.33,
+            speed: 0.351,
+            range: 394,
+            tracer: {
+                width: 1.2,
+                length: 2.25,
+                color: 0x8934eb
+            }
         }
     },
 
