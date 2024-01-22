@@ -2396,5 +2396,37 @@ export const Buildings = new ObjectDefinitions<BuildingDefinition>([
             { idString: "box", position: Vec.create(28, 1.52), rotation: 0 },
             { idString: "barrel", position: Vec.create(-18.9, 14.62), rotation: 0 }
         ]
+    },
+
+    // Suroi Rejects
+
+    {
+        idString: "station",
+        name: "Station",
+        spawnHitbox: RectangleHitbox.fromRect(100, 50),
+        spawnMode: MapObjectSpawnMode.GrassAndSand,
+        groundGraphics: [
+            {
+                color: 0x595959,
+                hitbox: RectangleHitbox.fromRect(100, 50, Vec.create(0, 0))
+            }
+        ],
+        floors: [{
+            type: "stone",
+            hitbox: RectangleHitbox.fromRect(100, 50, Vec.create(0, 0))
+        }],
+        subBuildings: [
+            { idString: "station_building", position: Vec.create(0, 0) }
+        ]
+    },
+    {
+        idString: "station_building",
+        name: "Station Building",
+        spawnHitbox: RectangleHitbox.fromRect(80, 40),
+        scopeHitbox: RectangleHitbox.fromRect(80, 40),
+        floorImages: [{
+            key: "station_building_floor",
+            position: Vec.create(0, 0)
+        }]
     }
 ]);

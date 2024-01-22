@@ -59,6 +59,7 @@ export const Maps: Record<string, MapDefinition> = {
             maxWideWidth: 32
         },
         buildings: {
+            // station: 20,
             port_complex: 1,
             armory: 1,
             refinery: 1,
