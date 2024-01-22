@@ -42,7 +42,9 @@ export const Config = {
         "123op": { password: "123op" },
         radians: { password: "radians" },
         limenade: { password: "limenade" }
-    }
+    },
+
+    disableLobbyClearing: true
 } satisfies ConfigType as ConfigType;
 
 export interface ConfigType {
