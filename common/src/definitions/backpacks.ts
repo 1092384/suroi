@@ -92,7 +92,7 @@ export const Backpacks = new ObjectDefinitions<BackpackDefinition>([
             "762mm": 300,
             "45acp": 300,
             "9mm": 420,
-            "127mm": 80,
+            "127mm": 300,
             power_cell: Infinity,
             curadell: 4,
             frag_grenade: 12,

@@ -1478,6 +1478,46 @@ const GunsRaw: RawGunDefinition[] = [
             }
         }
     },
+    {
+        idString: "awms",
+        name: "AWM-S",
+        itemType: ItemType.Gun,
+        ammoType: "127mm",
+        ammoSpawnAmount: 200,
+        capacity: 200,
+        reloadTime: 3.5,
+        fireDelay: 90,
+        switchDelay: 1000,
+        speedMultiplier: 0.92,
+        recoilMultiplier: 0.3,
+        recoilDuration: 1500,
+        fireMode: FireMode.Auto,
+        shotSpread: 0.5,
+        moveSpread: 4.5,
+        length: 9.2,
+        shootOnRelease: true,
+        fists: {
+            left: Vec.create(115, -4),
+            right: Vec.create(40, 0),
+            rightZIndex: 4,
+            animationDuration: 100
+        },
+        image: { position: Vec.create(90, 4) },
+        casingParticles: {
+            position: Vec.create(2, 0.6),
+            ejectionDelay: 700
+        },
+        ballistics: {
+            damage: 180,
+            obstacleMultiplier: 1.5,
+            speed: 0.306,
+            range: 675,
+            tracer: {
+                width: 2.3,
+                length: 2.25
+            }
+        }
+    },
 
     // Ukraine Gun
 
