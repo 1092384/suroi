@@ -21,8 +21,8 @@ export interface LootTable {
 // TODO Refactor loot table system
 export const LootTables: Record<string, LootTable> = {
     ground_loot: {
-        min: 10,
-        max: 10,
+        min: 20,
+        max: 20,
         loot: [
             { tier: "equipment", weight: 1 },
             { tier: "healing_items", weight: 1 },
@@ -411,6 +411,7 @@ export const LootTables: Record<string, LootTable> = {
 export const LootTiers: Record<string, WeightedItem[]> = {
     guns: [
         { item: "model_94", weight: 10 },
+        { item: "sv98", weight: 10 },
         { item: "fort_17", weight: 10 },
         { item: "m249", weight: 10 },
         { item: "bar", weight: 10 },

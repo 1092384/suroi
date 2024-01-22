@@ -1438,6 +1438,46 @@ const GunsRaw: RawGunDefinition[] = [
             }
         }
     },
+    {
+        idString: "sv98",
+        name: "SV-98",
+        itemType: ItemType.Gun,
+        ammoType: "762mm",
+        ammoSpawnAmount: 30,
+        capacity: 10,
+        reloadTime: 2.7,
+        fireDelay: 1500,
+        switchDelay: 100,
+        speedMultiplier: 0.92,
+        recoilMultiplier: 0.4,
+        recoilDuration: 1000,
+        fireMode: FireMode.Single,
+        shotSpread: 1,
+        moveSpread: 3.5,
+        length: 8.9,
+        shootOnRelease: true,
+        fists: {
+            left: Vec.create(106, -1),
+            right: Vec.create(40, 0),
+            rightZIndex: 4,
+            animationDuration: 100
+        },
+        image: { position: Vec.create(90, 5) },
+        casingParticles: {
+            position: Vec.create(4, 0.6),
+            ejectionDelay: 450
+        },
+        ballistics: {
+            damage: 80,
+            obstacleMultiplier: 1.5,
+            speed: 0.4095,
+            range: 1170,
+            tracer: {
+                width: 2.4,
+                length: 2.25
+            }
+        }
+    },
 
     // Ukraine Gun
 
