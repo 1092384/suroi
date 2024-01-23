@@ -70,8 +70,8 @@ export const LootTables: Record<string, LootTable> = {
         ]
     },
     aegis_crate: {
-        min: 3,
-        max: 5,
+        min: 5,
+        max: 8,
         loot: [
             { tier: "special_guns", weight: 1 },
             { tier: "special_healing_items", weight: 0.15 },
@@ -80,8 +80,8 @@ export const LootTables: Record<string, LootTable> = {
         ]
     },
     flint_crate: {
-        min: 3,
-        max: 5,
+        min: 5,
+        max: 8,
         loot: [
             { tier: "special_guns", weight: 1 },
             { tier: "special_equipment", weight: 0.65 },
@@ -392,9 +392,12 @@ export const LootTables: Record<string, LootTable> = {
         min: 1,
         max: 1,
         loot: [
-            { item: "vector", weight: 3 },
-            { item: "arx160", weight: 1 },
-            { item: "vepr12", weight: 1 },
+            { item: "pkp", weight: 3 },
+            { item: "vector", weight: 1 },
+            { item: "m134", weight: 0.1 },
+            // { item: "vector", weight: 3 },
+            // { item: "arx160", weight: 1 },
+            // { item: "vepr12", weight: 1 },
             { item: "g19", weight: 0.05 }
         ]
     },
@@ -410,8 +413,8 @@ export const LootTables: Record<string, LootTable> = {
 
 export const LootTiers: Record<string, WeightedItem[]> = {
     guns: [
+        { item: "radio", weight: 5 },
         { item: "g19", weight: 2 },
-        { item: "radio", weight: 2 },
         { item: "m1895", weight: 1.75 },
         { item: "mp40", weight: 1.7 },
         { item: "saf_200", weight: 1.5 },
@@ -483,8 +486,8 @@ export const LootTiers: Record<string, WeightedItem[]> = {
         { item: "smoke_grenade", count: 2, weight: 1 }
     ],
     special_guns: [
+        { item: "radio", weight: 8 },
         { item: "micro_uzi", weight: 1.25 },
-        { item: "radio", weight: 1.24 },
         { item: "tommy", weight: 1.12 },
         { item: "ak47", weight: 1.1 },
         { item: "aug", weight: 1.05 },
