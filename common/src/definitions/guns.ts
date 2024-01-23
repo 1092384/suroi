@@ -1643,6 +1643,48 @@ const GunsRaw: RawGunDefinition[] = [
         }
     },
 
+    {
+        idString: "delisle",
+        name: "De Lisle",
+        itemType: ItemType.Gun,
+        ammoType: "45acp",
+        ammoSpawnAmount: 44,
+        capacity: 11,
+        reloadTime: 2.5,
+        fireDelay: 700,
+        switchDelay: 700,
+        speedMultiplier: 0.92,
+        recoilMultiplier: 0.6,
+        recoilDuration: 300,
+        fireMode: FireMode.Single,
+        shotSpread: 1.5,
+        moveSpread: 2.5,
+        length: 8.7,
+        shootOnRelease: true,
+        fists: {
+            left: Vec.create(113, 0),
+            right: Vec.create(40, 0),
+            rightZIndex: 4,
+            animationDuration: 100
+        },
+        image: { position: Vec.create(85, 0) },
+        casingParticles: {
+            position: Vec.create(4, 0.6),
+            ejectionDelay: 500
+        },
+        ballistics: {
+            damage: 62,
+            obstacleMultiplier: 1,
+            speed: 0.21,
+            range: 150,
+            tracer: {
+                opacity: 0.5,
+                length: 2
+            }
+        },
+        noMuzzleFlash: true
+    },
+
     // only event weapons below this point
 
     {
