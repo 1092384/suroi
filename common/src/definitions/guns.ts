@@ -1608,6 +1608,40 @@ const GunsRaw: RawGunDefinition[] = [
             }
         }
     },
+    {
+        idString: "tommy",
+        name: "Tommy Gun",
+        itemType: ItemType.Gun,
+        ammoType: "45acp",
+        ammoSpawnAmount: 100,
+        capacity: 50,
+        reloadTime: 3,
+        fireDelay: 75,
+        switchDelay: 350,
+        speedMultiplier: 0.92,
+        recoilMultiplier: 0.7,
+        recoilDuration: 170,
+        fireMode: FireMode.Auto,
+        shotSpread: 6,
+        moveSpread: 10,
+        length: 6.55,
+        fists: {
+            left: Vec.create(103, -2),
+            right: Vec.create(40, 0),
+            rightZIndex: 4,
+            animationDuration: 100
+        },
+        image: { position: Vec.create(76, -3) },
+        casingParticles: {
+            position: Vec.create(4, 0.6)
+        },
+        ballistics: {
+            damage: 12,
+            obstacleMultiplier: 1,
+            speed: 0.25,
+            range: 120
+        }
+    },
 
     // only event weapons below this point
 
