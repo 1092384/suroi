@@ -413,7 +413,7 @@ export const LootTables: Record<string, LootTable> = {
 
 export const LootTiers: Record<string, WeightedItem[]> = {
     guns: [
-        { item: "radio", weight: 5 },
+        { item: "radio", weight: 3.5 },
         { item: "g19", weight: 2 },
         { item: "m1895", weight: 1.75 },
         { item: "mp40", weight: 1.7 },
@@ -486,7 +486,7 @@ export const LootTiers: Record<string, WeightedItem[]> = {
         { item: "smoke_grenade", count: 2, weight: 1 }
     ],
     special_guns: [
-        { item: "radio", weight: 8 },
+        { item: "radio", weight: 5 },
         { item: "micro_uzi", weight: 1.25 },
         { item: "tommy", weight: 1.12 },
         { item: "ak47", weight: 1.1 },
@@ -588,17 +588,17 @@ export const LootTiers: Record<string, WeightedItem[]> = {
         { item: "tango_51", weight: 0.9 },
         { item: "sv98", weight: 0.9 },
         { item: "stoner_63", weight: 0.9 },
-        { item: "pkp", weight: 0.7 },
-        { item: "m249", weight: 0.7 },
+        { item: "pkp", weight: 0.6 },
+        { item: "m249", weight: 0.6 },
         { item: "radio", weight: 0.5 }
     ],
     gold_airdrop_guns: [
-        { item: "sv98", weight: 1.1 },
         { item: "m1_garand", weight: 1.1 },
+        { item: "sv98", weight: 1.1 },
         { item: "acr", weight: 1 },
         { item: "pkp", weight: 0.7 },
         { item: "m249", weight: 0.7 },
-        { item: "barrett", weight: 0.5 },
+        { item: "barrett", weight: 0.3 },
         { item: "m134", weight: 0.3 },
         { item: "awms", weight: 0.2 },
         { item: "g19", weight: 0.0005 }
