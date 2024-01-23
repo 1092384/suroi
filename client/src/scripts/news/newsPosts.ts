@@ -3,6 +3,14 @@ import { type NewsPost } from "./newsHelper";
 
 export const news: NewsPost[] = [
     {
+        date: 1705986923937,
+        author: "Compositr",
+        title: "Island Rain",
+        content: `It ain't quite Desert Rain - but it's close enough! Featuring your favorite (or least favorite) guns from days gone by, plus a couple special guests.
+      
+      As usual, Radio spawns have been massively buffed for a short time only.`
+    },
+    {
         date: 1705262400000,
         author: "HAZEL",
         title: "Pulling the Pin",
