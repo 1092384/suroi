@@ -21,14 +21,14 @@ export interface LootTable {
 // TODO Refactor loot table system
 export const LootTables: Record<string, LootTable> = {
     ground_loot: {
-        min: 20,
-        max: 20,
+        min: 1,
+        max: 2,
         loot: [
             { tier: "equipment", weight: 1 },
             { tier: "healing_items", weight: 1 },
             { tier: "ammo", weight: 1 },
-            { tier: "guns", weight: 100 },
-            { tier: "scopes", weight: 0.3 }
+            { tier: "guns", weight: 2 }
+            // { tier: "scopes", weight: 0.3 }
         ]
     },
     regular_crate: {
