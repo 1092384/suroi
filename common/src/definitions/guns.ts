@@ -1447,7 +1447,7 @@ const GunsRaw: RawGunDefinition[] = [
         capacity: 10,
         reloadTime: 2.7,
         fireDelay: 1500,
-        switchDelay: 100,
+        switchDelay: 1000,
         speedMultiplier: 0.92,
         recoilMultiplier: 0.4,
         recoilDuration: 1000,
@@ -1515,6 +1515,47 @@ const GunsRaw: RawGunDefinition[] = [
             tracer: {
                 width: 2.3,
                 length: 2.25
+            }
+        }
+    },
+    {
+        idString: "super90",
+        name: "Super 90",
+        itemType: ItemType.Gun,
+        ammoType: "12g",
+        ammoSpawnAmount: 16,
+        capacity: 8,
+        reloadTime: 0.52,
+        singleReload: true,
+        fireDelay: 400,
+        switchDelay: 750,
+        speedMultiplier: 1,
+        recoilMultiplier: 0.5,
+        recoilDuration: 500,
+        fireMode: FireMode.Single,
+        shotSpread: 4,
+        moveSpread: 8,
+        length: 8.9,
+        shootOnRelease: true,
+        fists: {
+            left: Vec.create(106, 0),
+            right: Vec.create(40, 0),
+            rightZIndex: 4,
+            animationDuration: 100
+        },
+        image: { position: Vec.create(90, 5) },
+        casingParticles: {
+            position: Vec.create(4, 0.6)
+        },
+        ballistics: {
+            damage: 77,
+            obstacleMultiplier: 1,
+            speed: 0.2655,
+            range: 135,
+            tracer: {
+                width: 3,
+                length: 0.7,
+                color: 0xFEDCDC
             }
         }
     },
