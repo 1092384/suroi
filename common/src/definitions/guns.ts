@@ -1559,6 +1559,44 @@ const GunsRaw: RawGunDefinition[] = [
             }
         }
     },
+    {
+        idString: "an94",
+        name: "AN-94",
+        itemType: ItemType.Gun,
+        ammoType: "762mm",
+        ammoSpawnAmount: 90,
+        capacity: 45,
+        reloadTime: 2.35,
+        fireDelay: 25,
+        switchDelay: 750,
+        speedMultiplier: 1,
+        recoilMultiplier: 0.5,
+        recoilDuration: 300,
+        fireMode: FireMode.Burst,
+        burstProperties: {
+            shotsPerBurst: 2,
+            burstCooldown: 240
+        },
+        shotSpread: 1.5,
+        moveSpread: 5.5,
+        length: 7.5,
+        fists: {
+            left: Vec.create(120, -2),
+            right: Vec.create(45, 0),
+            rightZIndex: 4,
+            animationDuration: 100
+        },
+        image: { position: Vec.create(90, 2) },
+        casingParticles: {
+            position: Vec.create(4, 0.6)
+        },
+        ballistics: {
+            damage: 17.5,
+            obstacleMultiplier: 1,
+            speed: 0.2475,
+            range: 675
+        }
+    },
 
     // Ukraine Gun
 
@@ -1602,6 +1640,42 @@ const GunsRaw: RawGunDefinition[] = [
             moveSpread: 12,
             capacity: 24,
             reloadTime: 2.4
+        }
+    },
+
+    // rejects
+    {
+        idString: "p90",
+        name: "P90",
+        itemType: ItemType.Gun,
+        ammoType: "9mm",
+        ammoSpawnAmount: 200,
+        capacity: 100,
+        reloadTime: 2.9,
+        fireDelay: 50,
+        switchDelay: 100,
+        speedMultiplier: 1,
+        recoilMultiplier: 0.6,
+        recoilDuration: 100,
+        fireMode: FireMode.Auto,
+        shotSpread: 4,
+        moveSpread: 10,
+        length: 7.1,
+        fists: {
+            left: Vec.create(85, -6),
+            right: Vec.create(40, 0),
+            rightZIndex: 4,
+            animationDuration: 100
+        },
+        casingParticles: {
+            position: Vec.create(4.5, 0.6)
+        },
+        image: { position: Vec.create(80, 0) },
+        ballistics: {
+            damage: 8,
+            obstacleMultiplier: 1,
+            speed: 0.20,
+            range: 70
         }
     },
 
