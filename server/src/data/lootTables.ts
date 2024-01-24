@@ -202,10 +202,11 @@ export const LootTables: Record<string, LootTable> = {
         ]
     },
     fridge: {
-        min: 2,
-        max: 3,
+        min: 3,
+        max: 4,
         loot: [
-            { item: "cola", weight: 1 }
+            { item: "cola", weight: 1 },
+            { item: "blueberry_smoothie", weight: 0.01 }
         ]
     },
     washing_machine: {
@@ -571,7 +572,6 @@ export const LootTiers: Record<string, WeightedItem[]> = {
         { item: null, weight: 1 },
         { item: "stardust", weight: 0.5 },
         { item: "aurora", weight: 0.5 },
-        { item: "blueberry_smoothie", weight: 0.3 },
         { item: "ghillie_suit", weight: 0.1 },
         { item: "basic_outfit", weight: 0.001 }
     ],
