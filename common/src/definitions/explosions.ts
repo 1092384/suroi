@@ -255,6 +255,36 @@ export const Explosions = new ObjectDefinitions<ExplosionDefinition>(
             decal: "frag_explosion_decal"
         },
         {
+            idString: "molotov_cocktail",
+            name: "Molotov Cocktail",
+            damage: 10,
+            obstacleMultiplier: 1.15,
+            radius: {
+                min: 1,
+                max: 4
+            },
+            cameraShake: {
+                duration: 200,
+                intensity: 10
+            },
+            animation: {
+                duration: 1000,
+                tint: 0x91140b,
+                scale: 1.5
+            },
+            shrapnelCount: 3,
+            ballistics: {
+                damage: 15,
+                obstacleMultiplier: 1,
+                speed: 0.08,
+                range: 20,
+                rangeVariance: 1,
+                shrapnel: true
+            },
+            sound: "frag_grenade",
+            decal: "molotov_explosion_decal"
+        },
+        {
             idString: "smoke_explosion",
             name: "Smoke grenade",
             damage: 0,

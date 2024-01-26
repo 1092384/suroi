@@ -30,6 +30,11 @@ export const Decals = new ObjectDefinitions<DecalDefinition>(
             rotationMode: RotationMode.Full
         },
         {
+            idString: "molotov_explosion_decal",
+            name: "Molotov Explosion Decal",
+            rotationMode: RotationMode.Full
+        },
+        {
             idString: "floor_oil_01",
             name: "Floor Oil 1"
         },

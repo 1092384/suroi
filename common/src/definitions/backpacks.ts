@@ -28,7 +28,8 @@ export const Backpacks = new ObjectDefinitions<BackpackDefinition>([
             power_cell: Infinity,
             curadell: 1,
             frag_grenade: 3,
-            smoke_grenade: 3
+            smoke_grenade: 3,
+            molotov_cocktail: 10 // test
         },
         noDrop: true
     },
@@ -50,7 +51,8 @@ export const Backpacks = new ObjectDefinitions<BackpackDefinition>([
             power_cell: Infinity,
             curadell: 2,
             frag_grenade: 6,
-            smoke_grenade: 6
+            smoke_grenade: 6,
+            molotov_cocktail: 10 // test
         }
     },
     {
@@ -71,7 +73,8 @@ export const Backpacks = new ObjectDefinitions<BackpackDefinition>([
             power_cell: Infinity,
             curadell: 3,
             frag_grenade: 9,
-            smoke_grenade: 9
+            smoke_grenade: 9,
+            molotov_cocktail: 10 // test
         }
     },
     {
@@ -92,7 +95,8 @@ export const Backpacks = new ObjectDefinitions<BackpackDefinition>([
             power_cell: Infinity,
             curadell: 4,
             frag_grenade: 12,
-            smoke_grenade: 12
+            smoke_grenade: 12,
+            molotov_cocktail: 10 // test
         }
     }
 ]);

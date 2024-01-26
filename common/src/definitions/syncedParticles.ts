@@ -117,20 +117,35 @@ function createParticle(idString: string, name: string, options?: Partial<Synced
             mean: 20000,
             deviation: 1000
         },
-        zIndex: ZIndexes.ObstaclesLayer4,
-        frame: "smoke_grenade_particle",
         ...options
     };
 }
 
 export const SyncedParticles = new ObjectDefinitions<SyncedParticleDefinition>([
-    createParticle("smoke_grenade_particle", "Smoke Grenade Particle"),
+    createParticle("molotov_cocktail_particle", "Molotov Cocktail Particle", {
+        hitbox: new CircleHitbox(5),
+        angularVelocity: {
+            min: -0.0125,
+            max: 0.0125
+        },
+        depletePerMs: {
+            health: 0.0045
+        },
+        frame: "molotov_cocktail_particle",
+        zIndex: ZIndexes.ObstaclesLayer2,
+    }),
+    createParticle("smoke_grenade_particle", "Smoke Grenade Particle", {
+        frame: "smoke_grenade_particle",
+        zIndex: ZIndexes.ObstaclesLayer4,
+    }),
     createParticle("tear_gas_particle", "Tear Gas Particle", {
         tint: 0xa0e6ff,
         hitbox: new CircleHitbox(11),
         depletePerMs: {
             adrenaline: 0.0055
-        }
+        },
+        frame: "smoke_grenade_particle",
+        zIndex: ZIndexes.ObstaclesLayer4,
     }),
     createParticle("airdrop_smoke_particle", "Airdrop Smoke Particle", {
         velocity: {
@@ -146,6 +161,8 @@ export const SyncedParticles = new ObjectDefinitions<SyncedParticleDefinition>([
         lifetime: {
             mean: 2000,
             deviation: 500
-        }
+        },
+        frame: "smoke_grenade_particle",
+        zIndex: ZIndexes.ObstaclesLayer4,
     })
 ]);

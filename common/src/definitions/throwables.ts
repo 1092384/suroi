@@ -8,7 +8,7 @@ export type ThrowableDefinition = InventoryItemDefinition & {
     /**
      * Specified in *milliseconds*
      */
-    readonly fuseTime: number
+    fuseTime: number
     /**
      * Note: setting this higher than `fuseTime` guarantees that the grenade detonates in the user's hands,
      * except if they drop it at their feet and run away
@@ -35,6 +35,7 @@ export type ThrowableDefinition = InventoryItemDefinition & {
         readonly explosion?: ReferenceTo<ExplosionDefinition>
         readonly particles?: SyncedParticleSpawnerDefinition
     }
+    readonly explodeOnImpact?: boolean
     readonly animation: {
         readonly pinImage: string
         readonly liveImage: string
@@ -82,12 +83,61 @@ export const Throwables: ThrowableDefinition[] = [
         detonation: {
             explosion: "frag_explosion"
         },
+        explodeOnImpact: true,
         animation: {
             pinImage: "proj_frag_pin",
             liveImage: "proj_frag",
             leverImage: "proj_frag_lever",
             cook: {
                 leftFist: Vec.create(2.5, 0),
+                rightFist: Vec.create(-0.5, 2.15)
+            },
+            throw: {
+                leftFist: Vec.create(1.9, -1.75),
+                rightFist: Vec.create(4, 2.15)
+            }
+        }
+    },
+    {
+        idString: "molotov_cocktail",
+        name: "Molotov Cocktail",
+        itemType: ItemType.Throwable,
+        speedMultiplier: 0.92,
+        cookSpeedMultiplier: 0.7,
+        hitboxRadius: 1,
+        impactDamage: 1,
+        obstacleMultiplier: 20,
+        fuseTime: 4000,
+        cookTime: 150,
+        throwTime: 150,
+        cookable: true,
+        maxThrowDistance: 64,
+        image: {
+            position: Vec.create(60, 43),
+            angle: 60
+        },
+        speedCap: 0.15,
+        detonation: {
+            explosion: "molotov_cocktail",
+            particles: {
+                type: "molotov_cocktail_particle",
+                count: 70,
+                deployAnimation: {
+                    duration: 4000,
+                    staggering: {
+                        delay: 50,
+                        initialAmount: 20
+                    }
+                },
+                spawnRadius: 20
+            }
+        },
+        animation: {
+            pinImage: "match",
+            liveImage: "proj_molotov",
+            leverImage: "proj_frag_lever",
+            cook: {
+                leftFist: Vec.create(0, 0),
                 rightFist: Vec.create(-0.5, 2.15)
             },
             throw: {
@@ -143,5 +193,5 @@ export const Throwables: ThrowableDefinition[] = [
                 rightFist: Vec.create(4, 2.15)
             }
         }
-    }
+    },
 ];
