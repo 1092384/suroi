@@ -132,11 +132,11 @@ export const SyncedParticles = new ObjectDefinitions<SyncedParticleDefinition>([
             health: 0.0045
         },
         frame: "molotov_cocktail_particle",
-        zIndex: ZIndexes.ObstaclesLayer2,
+        zIndex: ZIndexes.DeathMarkers
     }),
     createParticle("smoke_grenade_particle", "Smoke Grenade Particle", {
         frame: "smoke_grenade_particle",
-        zIndex: ZIndexes.ObstaclesLayer4,
+        zIndex: ZIndexes.ObstaclesLayer4
     }),
     createParticle("tear_gas_particle", "Tear Gas Particle", {
         tint: 0xa0e6ff,
@@ -145,7 +145,7 @@ export const SyncedParticles = new ObjectDefinitions<SyncedParticleDefinition>([
             adrenaline: 0.0055
         },
         frame: "smoke_grenade_particle",
-        zIndex: ZIndexes.ObstaclesLayer4,
+        zIndex: ZIndexes.ObstaclesLayer4
     }),
     createParticle("airdrop_smoke_particle", "Airdrop Smoke Particle", {
         velocity: {
@@ -163,6 +163,6 @@ export const SyncedParticles = new ObjectDefinitions<SyncedParticleDefinition>([
             deviation: 500
         },
         frame: "smoke_grenade_particle",
-        zIndex: ZIndexes.ObstaclesLayer4,
+        zIndex: ZIndexes.ObstaclesLayer4
     })
 ]);

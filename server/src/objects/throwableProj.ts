@@ -7,7 +7,7 @@ import { type FullData } from "../../../common/src/utils/objectsSerializations";
 import { FloorTypes } from "../../../common/src/utils/terrain";
 import { Vec, type Vector } from "../../../common/src/utils/vector";
 import { type Game } from "../game";
-import { type ThrowableItem } from "../inventory/throwableItem";
+import { type GrenadeHandler, type ThrowableItem } from "../inventory/throwableItem";
 import { BaseGameObject, type GameObject } from "./gameObject";
 import { Obstacle } from "./obstacle";
 import { Player } from "./player";
@@ -29,7 +29,8 @@ export class ThrowableProjectile extends BaseGameObject<ObjectCategory.Throwable
 
     angularVelocity = 0.0035;
 
-    private readonly source: ThrowableItem;
+    private readonly _source: ThrowableItem;
+    private readonly _handler: GrenadeHandler;
 
     private readonly _spawnTime: number;
 
@@ -76,10 +77,17 @@ export class ThrowableProjectile extends BaseGameObject<ObjectCategory.Throwable
      */
     private _damagedLastTick = new Set<GameObject>();
 
-    constructor(game: Game, position: Vector, definition: ThrowableDefinition, source: ThrowableItem, radius?: number) {
+    constructor(
+        game: Game,
+        position: Vector,
+        definition: ThrowableDefinition,
+        handler: GrenadeHandler,
+        radius?: number
+    ) {
         super(game, position);
         this.definition = definition;
-        this.source = source;
+        this._handler = handler;
+        this._source = handler.parent;
         this._spawnTime = this.game.now;
         this.hitbox = new CircleHitbox(radius ?? 1, position);
     }
@@ -143,6 +151,8 @@ export class ThrowableProjectile extends BaseGameObject<ObjectCategory.Throwable
 
         const damagedThisTick = new Set<GameObject>();
 
+        let markedForRemoval = false;
+
         for (const object of this.game.grid.intersectsHitbox(this.hitbox)) {
             const isObstacle = object instanceof Obstacle;
             const isPlayer = object instanceof Player;
@@ -151,7 +161,7 @@ export class ThrowableProjectile extends BaseGameObject<ObjectCategory.Throwable
                 object.dead ||
                 (
                     (!isObstacle || !object.collidable) &&
-                    (!isPlayer || !shouldDealImpactDamage || (!this._collideWithOwner && object === this.source.owner))
+                    (!isPlayer || !shouldDealImpactDamage || (!this._collideWithOwner && object === this._source.owner))
                 )
             ) continue;
 
@@ -181,9 +191,16 @@ export class ThrowableProjectile extends BaseGameObject<ObjectCategory.Throwable
             if (shouldDealImpactDamage && !this._damagedLastTick.has(object)) {
                 object.damage(
                     impactDamage * ((isObstacle ? this.definition.obstacleMultiplier : undefined) ?? 1),
-                    this.source.owner,
-                    this.source
+                    this._source.owner,
+                    this._source
                 );
+
+                if (this.definition.detonateOnImpact) {
+                    this._handler.detonate();
+                    this._handler.destroy();
+                    markedForRemoval = true;
+                    break;
+                }
 
                 if (object.dead) {
                     continue;
@@ -257,8 +274,11 @@ export class ThrowableProjectile extends BaseGameObject<ObjectCategory.Throwable
 
         this._collideWithOwner ||= this.game.now - this._spawnTime >= 250;
         this._damagedLastTick = damagedThisTick;
-        this.game.grid.updateObject(this);
-        this.game.partialDirtyObjects.add(this);
+
+        if (!markedForRemoval) {
+            this.game.grid.updateObject(this);
+            this.game.partialDirtyObjects.add(this);
+        }
     }
 
     damage(_amount: number, _source?: BaseGameObject<ObjectCategory> | undefined): void { }

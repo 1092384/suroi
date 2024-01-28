@@ -8,7 +8,7 @@ export type ThrowableDefinition = InventoryItemDefinition & {
     /**
      * Specified in *milliseconds*
      */
-    fuseTime: number
+    readonly fuseTime: number
     /**
      * Note: setting this higher than `fuseTime` guarantees that the grenade detonates in the user's hands,
      * except if they drop it at their feet and run away
@@ -35,7 +35,7 @@ export type ThrowableDefinition = InventoryItemDefinition & {
         readonly explosion?: ReferenceTo<ExplosionDefinition>
         readonly particles?: SyncedParticleSpawnerDefinition
     }
-    readonly explodeOnImpact?: boolean
+    readonly detonateOnImpact?: boolean
     readonly animation: {
         readonly pinImage: string
         readonly liveImage: string
@@ -83,7 +83,7 @@ export const Throwables: ThrowableDefinition[] = [
         detonation: {
             explosion: "frag_explosion"
         },
-        explodeOnImpact: true,
+        detonateOnImpact: true,
         animation: {
             pinImage: "proj_frag_pin",
             liveImage: "proj_frag",
@@ -111,6 +111,7 @@ export const Throwables: ThrowableDefinition[] = [
         cookTime: 150,
         throwTime: 150,
         cookable: true,
+        detonateOnImpact: true,
         maxThrowDistance: 64,
         image: {
             position: Vec.create(60, 43),
@@ -193,5 +194,5 @@ export const Throwables: ThrowableDefinition[] = [
                 rightFist: Vec.create(4, 2.15)
             }
         }
-    },
+    }
 ];

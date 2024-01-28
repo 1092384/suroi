@@ -12,6 +12,7 @@ export interface ExplosionDefinition extends ObjectDefinition {
         readonly duration: number
         readonly intensity: number
     }
+    readonly forceMultiplier?: number
     readonly animation: {
         readonly duration: number
         readonly tint: number | `#${string}`
@@ -264,9 +265,10 @@ export const Explosions = new ObjectDefinitions<ExplosionDefinition>(
                 max: 4
             },
             cameraShake: {
-                duration: 200,
-                intensity: 10
+                duration: 100,
+                intensity: 3
             },
+            forceMultiplier: 0,
             animation: {
                 duration: 1000,
                 tint: 0x91140b,

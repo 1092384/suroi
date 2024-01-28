@@ -3,7 +3,7 @@ import { GameConstants, KillFeedMessageType, KillType, ObjectCategory, PacketTyp
 import { type ExplosionDefinition } from "../../common/src/definitions/explosions";
 import { type LootDefinition } from "../../common/src/definitions/loots";
 import { Obstacles, type ObstacleDefinition } from "../../common/src/definitions/obstacles";
-import { SyncedParticles, type SyncedParticleSpawnerDefinition, type SyncedParticleDefinition } from "../../common/src/definitions/syncedParticles";
+import { SyncedParticles, type SyncedParticleDefinition, type SyncedParticleSpawnerDefinition } from "../../common/src/definitions/syncedParticles";
 import { type ThrowableDefinition } from "../../common/src/definitions/throwables";
 import { InputPacket } from "../../common/src/packets/inputPacket";
 import { JoinPacket } from "../../common/src/packets/joinPacket";
@@ -22,7 +22,7 @@ import { Config, SpawnMode } from "./config";
 import { Maps } from "./data/maps";
 import { Gas } from "./gas";
 import { type GunItem } from "./inventory/gunItem";
-import { type ThrowableItem } from "./inventory/throwableItem";
+import { type GrenadeHandler } from "./inventory/throwableItem";
 import { Map } from "./map";
 import { Building } from "./objects/building";
 import { Bullet, type DamageRecord, type ServerBulletOptions } from "./objects/bullet";
@@ -555,7 +555,7 @@ export class Game {
         return explosion;
     }
 
-    addProjectile(definition: ThrowableDefinition, position: Vector, source: ThrowableItem): ThrowableProjectile {
+    addProjectile(definition: ThrowableDefinition, position: Vector, source: GrenadeHandler): ThrowableProjectile {
         const projectile = new ThrowableProjectile(this, position, definition, source);
         this.grid.addObject(projectile);
         return projectile;

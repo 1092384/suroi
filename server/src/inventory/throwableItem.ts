@@ -44,16 +44,19 @@ export class ThrowableItem extends CountableInventoryItem<ThrowableDefinition> {
 
         owner.action?.cancel();
 
-        this._activeHandler = new GrenadeHandler(this.definition, this.owner.game, this, () => this._detachHandler());
+        this._activeHandler = new GrenadeHandler(
+            this.definition,
+            this.owner.game,
+            this,
+            // what even is this rule
+            // eslint-disable-next-line no-return-assign
+            () => this._activeHandler = undefined
+        );
         this._activeHandler.cook();
     }
 
     override stopUse(): void {
         this._activeHandler?.throw(!this.isActive);
-    }
-
-    private _detachHandler(): void {
-        this._activeHandler = undefined;
     }
 
     override useItem(): void {
@@ -64,7 +67,7 @@ export class ThrowableItem extends CountableInventoryItem<ThrowableDefinition> {
     }
 }
 
-class GrenadeHandler {
+export class GrenadeHandler {
     private _cookStart?: number;
     private _thrown = false;
     private _scheduledThrow?: Timeout;
@@ -82,7 +85,7 @@ class GrenadeHandler {
         this.owner = this.parent.owner;
     }
 
-    private _detonate(): void {
+    detonate(): void {
         const { explosion, particles } = this.definition.detonation;
 
         const referencePosition = Vec.clone(this._projectile?.position ?? this.parent.owner.position);
@@ -132,7 +135,7 @@ class GrenadeHandler {
                     }
 
                     this.destroy();
-                    this._detonate();
+                    this.detonate();
                 },
                 this.definition.fuseTime
             );
@@ -180,7 +183,7 @@ class GrenadeHandler {
         this._timer ??= this.game.addTimeout(
             () => {
                 this.destroy();
-                this._detonate();
+                this.detonate();
             },
             this.definition.fuseTime
         );
@@ -191,7 +194,7 @@ class GrenadeHandler {
                 this.owner.position,
                 Vec.rotate(definition.animation.cook.rightFist, this.owner.rotation)
             ),
-            this.parent
+            this
         );
 
         /**
