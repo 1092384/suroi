@@ -960,9 +960,21 @@ export class Player extends GameObject<ObjectCategory.Player> {
                 const pinImage = this.images.altWeapon;
 
                 projImage.visible = true;
-                pinImage.setFrame(def.animation.pinImage);
-                pinImage.setPos(35, 0);
-                pinImage.setZIndex(ZIndexes.Players + 1);
+                const pinImageData = def.animation.cook.pinImage;
+                const hasPin = pinImageData !== undefined;
+                if (hasPin) {
+                    const { frame, position = undefined, angleOffset = undefined } = typeof pinImageData === "object"
+                        ? pinImageData
+                        : { frame: pinImageData };
+
+                    pinImage.setFrame(frame);
+                    pinImage.setPos(position?.x ?? 35, position?.y ?? 0);
+                    pinImage.setZIndex(ZIndexes.Players + 1);
+                    pinImage.setAngle(angleOffset ?? 0);
+                } else {
+                    pinImage.setVisible(false);
+                }
+
                 projImage.setFrame(def.animation.cook.cookingImage ?? def.animation.liveImage);
 
                 this.anims.leftFist = new Tween(
@@ -981,37 +993,41 @@ export class Player extends GameObject<ObjectCategory.Player> {
                                 }
                             );
 
-                            pinImage.visible = true;
-                            this.anims.pin = new Tween(
-                                this.game, {
-                                    target: pinImage,
-                                    duration: def.cookTime / 2,
-                                    to: {
-                                        ...Vec.add(Vec.scale(def.animation.cook.leftFist, PIXI_SCALE), Vec.create(15, 0))
+                            if (hasPin) {
+                                pinImage.visible = hasPin;
+                                this.anims.pin = new Tween(
+                                    this.game, {
+                                        target: pinImage,
+                                        duration: def.cookTime / 2,
+                                        to: {
+                                            ...Vec.add(Vec.scale(def.animation.cook.leftFist, PIXI_SCALE), Vec.create(15, 0))
+                                        }
                                     }
-                                }
-                            );
+                                );
+                            }
                         }
                     }
                 );
 
                 if (def.cookable) {
-                    this.game.particleManager.spawnParticle({
-                        frames: def.animation.leverImage,
-                        lifetime: 600,
-                        position: this.position,
-                        zIndex: ZIndexes.Players + 1,
-                        speed: Vec.rotate(Vec.create(8, 8), this.rotation),
-                        rotation: this.rotation,
-                        alpha: {
-                            start: 1,
-                            end: 0
-                        },
-                        scale: {
-                            start: 0.8,
-                            end: 1
-                        }
-                    });
+                    if (def.animation.leverImage !== undefined) {
+                        this.game.particleManager.spawnParticle({
+                            frames: def.animation.leverImage,
+                            lifetime: 600,
+                            position: this.position,
+                            zIndex: ZIndexes.Players + 1,
+                            speed: Vec.rotate(Vec.create(8, 8), this.rotation),
+                            rotation: this.rotation,
+                            alpha: {
+                                start: 1,
+                                end: 0
+                            },
+                            scale: {
+                                start: 0.8,
+                                end: 1
+                            }
+                        });
+                    }
                 }
 
                 this.anims.weapon = new Tween(
@@ -1068,22 +1084,24 @@ export class Player extends GameObject<ObjectCategory.Player> {
                 projImage.setFrame(def.idString);
 
                 if (!def.cookable) {
-                    this.game.particleManager.spawnParticle({
-                        frames: def.animation.leverImage,
-                        lifetime: 600,
-                        position: this.position,
-                        zIndex: ZIndexes.Players + 1,
-                        speed: Vec.rotate(Vec.create(8, 8), this.rotation),
-                        rotation: this.rotation,
-                        alpha: {
-                            start: 1,
-                            end: 0
-                        },
-                        scale: {
-                            start: 0.8,
-                            end: 1
-                        }
-                    });
+                    if (def.animation.leverImage !== undefined) {
+                        this.game.particleManager.spawnParticle({
+                            frames: def.animation.leverImage,
+                            lifetime: 600,
+                            position: this.position,
+                            zIndex: ZIndexes.Players + 1,
+                            speed: Vec.rotate(Vec.create(8, 8), this.rotation),
+                            rotation: this.rotation,
+                            alpha: {
+                                start: 1,
+                                end: 0
+                            },
+                            scale: {
+                                start: 0.8,
+                                end: 1
+                            }
+                        });
+                    }
                 }
 
                 this.anims.rightFist?.kill();

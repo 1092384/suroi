@@ -634,7 +634,7 @@ export class Game {
      */
     removeObject(object: GameObject): void {
         this.grid.removeObject(object);
-        this.idAllocator.give(object.id);
+        this._idAllocator.give(object.id);
         this.updateObjects = true;
     }
 
@@ -724,10 +724,10 @@ export class Game {
         return this.livingPlayers.size;
     }
 
-    idAllocator = new IDAllocator(OBJECT_ID_BITS);
+    private readonly _idAllocator = new IDAllocator(OBJECT_ID_BITS);
 
     get nextObjectID(): number {
-        return this.idAllocator.takeNext();
+        return this._idAllocator.takeNext();
     }
 }
 

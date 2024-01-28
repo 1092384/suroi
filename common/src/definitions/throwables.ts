@@ -37,10 +37,14 @@ export type ThrowableDefinition = InventoryItemDefinition & {
     }
     readonly detonateOnImpact?: boolean
     readonly animation: {
-        readonly pinImage: string
         readonly liveImage: string
-        readonly leverImage: string
+        readonly leverImage?: string
         readonly cook: {
+            readonly pinImage?: string | {
+                readonly frame: string
+                readonly position?: Vector
+                readonly angleOffset?: number
+            }
             readonly cookingImage?: string
             readonly leftFist: Vector
             readonly rightFist: Vector
@@ -85,10 +89,10 @@ export const Throwables: ThrowableDefinition[] = [
         },
         detonateOnImpact: true,
         animation: {
-            pinImage: "proj_frag_pin",
             liveImage: "proj_frag",
             leverImage: "proj_frag_lever",
             cook: {
+                pinImage: "proj_frag_pin",
                 leftFist: Vec.create(2.5, 0),
                 rightFist: Vec.create(-0.5, 2.15)
             },
@@ -119,7 +123,7 @@ export const Throwables: ThrowableDefinition[] = [
         },
         speedCap: 0.15,
         detonation: {
-            explosion: "molotov_cocktail",
+            explosion: "molotov_explosion",
             particles: {
                 type: "molotov_cocktail_particle",
                 count: 70,
@@ -134,11 +138,14 @@ export const Throwables: ThrowableDefinition[] = [
             }
         },
         animation: {
-            pinImage: "match",
             liveImage: "proj_molotov",
-            leverImage: "proj_frag_lever",
             cook: {
-                leftFist: Vec.create(0, 0),
+                pinImage: {
+                    frame: "proj_molotov_pin",
+                    position: Vec.create(30, -10),
+                    angleOffset: 90
+                },
+                leftFist: Vec.create(2.5, 0),
                 rightFist: Vec.create(-0.5, 2.15)
             },
             throw: {
@@ -181,10 +188,10 @@ export const Throwables: ThrowableDefinition[] = [
             }
         },
         animation: {
-            pinImage: "proj_smoke_pin",
             liveImage: "proj_smoke",
             leverImage: "proj_smoke_lever",
             cook: {
+                pinImage: "proj_smoke_pin",
                 cookingImage: "proj_smoke_nopin",
                 leftFist: Vec.create(2.5, 0),
                 rightFist: Vec.create(-0.5, 2.15)

@@ -256,8 +256,8 @@ export const Explosions = new ObjectDefinitions<ExplosionDefinition>(
             decal: "frag_explosion_decal"
         },
         {
-            idString: "molotov_cocktail",
-            name: "Molotov Cocktail",
+            idString: "molotov_explosion",
+            name: "Molotov Explosion",
             damage: 10,
             obstacleMultiplier: 1.15,
             radius: {
