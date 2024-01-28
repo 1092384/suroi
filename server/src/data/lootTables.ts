@@ -70,8 +70,8 @@ export const LootTables: Record<string, LootTable> = {
         ]
     },
     aegis_crate: {
-        min: 5,
-        max: 8,
+        min: 4,
+        max: 6,
         loot: [
             { tier: "special_guns", weight: 1 },
             { tier: "special_healing_items", weight: 0.15 },
@@ -80,8 +80,8 @@ export const LootTables: Record<string, LootTable> = {
         ]
     },
     flint_crate: {
-        min: 5,
-        max: 8,
+        min: 4,
+        max: 6,
         loot: [
             { tier: "special_guns", weight: 1 },
             { tier: "special_equipment", weight: 0.65 },
