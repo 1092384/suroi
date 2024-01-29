@@ -4,7 +4,7 @@ export const Config = {
         ngrok: { name: "Special Server", address: "suroi15.dafox.box.ca", https: true }
     },
     defaultRegion: "ngrok",
-    mode: "normal"
+    mode: "desert"
 } satisfies ConfigType as ConfigType;
 
 export interface ConfigType {

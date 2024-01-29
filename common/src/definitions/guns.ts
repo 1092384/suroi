@@ -1604,7 +1604,7 @@ const GunsRaw: RawGunDefinition[] = [
         idString: "fort_17",
         name: "Fort-17",
         itemType: ItemType.Gun,
-        ammoType: "9mm",
+        ammoType: "45acp",
         ammoSpawnAmount: 48,
         capacity: 12,
         reloadTime: 1.2,

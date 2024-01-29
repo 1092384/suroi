@@ -379,8 +379,8 @@ export class Player extends BaseGameObject<ObjectCategory.Player> {
 
         // this.inventory.items.setItem("8x_scope", 1);
         // this.inventory.scope = "8x_scope";
-        // this.inventory.addOrReplaceWeapon(0, "an94");
-        // this.inventory.items.setItem("762mm", 200);
+        // this.inventory.addOrReplaceWeapon(0, "super90");
+        // this.inventory.items.setItem("12g", 200);
 
         this.updateAndApplyModifiers();
         this.dirty.weapons = true;

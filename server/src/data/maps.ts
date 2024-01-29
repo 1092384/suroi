@@ -50,11 +50,11 @@ export const Maps: Record<string, MapDefinition> = {
         oceanSize: 128,
         beachSize: 32,
         rivers: {
-            minAmount: 3,
-            maxAmount: 3,
-            wideChance: 0.35,
-            minWidth: 14,
-            maxWidth: 20,
+            minAmount: 2,
+            maxAmount: 2,
+            wideChance: 0,
+            minWidth: 12,
+            maxWidth: 15,
             minWideWidth: 27,
             maxWideWidth: 32
         },
@@ -80,8 +80,8 @@ export const Maps: Record<string, MapDefinition> = {
             oil_tank: 10,
             // christmas_tree: 1, // winter mode
             oak_tree: 250,
-            birch_tree: 25,
-            pine_tree: 15,
+            // birch_tree: 25,
+            // pine_tree: 15,
             regular_crate: 150,
             flint_crate: 50,
             aegis_crate: 50,
@@ -89,13 +89,13 @@ export const Maps: Record<string, MapDefinition> = {
             rock: 150,
             river_rock: 45,
             bush: 110,
-            blueberry_bush: 30,
+            // blueberry_bush: 30,
             barrel: 80,
             viking_chest: 1,
             super_barrel: 30,
             melee_crate: 1,
             gold_rock: 1,
-            flint_stone: 1
+            flint_stone: 20
         },
         loots: {
             ground_loot: 100
