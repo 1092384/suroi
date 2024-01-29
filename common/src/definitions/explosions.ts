@@ -1,6 +1,6 @@
 import { ObjectDefinitions, type BaseBulletDefinition, type ObjectDefinition, type ReferenceTo } from "../utils/objectDefinitions";
 import { type DecalDefinition } from "./decals";
-
+import { type SyncedParticleSpawnerDefinition } from "./syncedParticles";
 export interface ExplosionDefinition extends ObjectDefinition {
     readonly damage: number
     readonly obstacleMultiplier: number
@@ -17,6 +17,7 @@ export interface ExplosionDefinition extends ObjectDefinition {
         readonly duration: number
         readonly tint: number | `#${string}`
         readonly scale: number
+        readonly particles?: SyncedParticleSpawnerDefinition
     }
     readonly sound?: string // TODO: move the barrel and super barrel destroy sounds to explosion sounds
 
@@ -272,7 +273,19 @@ export const Explosions = new ObjectDefinitions<ExplosionDefinition>(
             animation: {
                 duration: 1000,
                 tint: 0x91140b,
-                scale: 1.5
+                scale: 1.5,
+                particles: {
+                    type: "molotov_explosion_particle",
+                    count: 50,
+                    deployAnimation: {
+                        duration: 4300,
+                        staggering: {
+                            delay: 20,
+                            initialAmount: 40
+                        }
+                    },
+                    spawnRadius: 12
+                }
             },
             shrapnelCount: 3,
             ballistics: {

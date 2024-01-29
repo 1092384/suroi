@@ -122,16 +122,38 @@ function createParticle(idString: string, name: string, options?: Partial<Synced
 }
 
 export const SyncedParticles = new ObjectDefinitions<SyncedParticleDefinition>([
-    createParticle("molotov_cocktail_particle", "Molotov Cocktail Particle", {
-        hitbox: new CircleHitbox(5),
+    createParticle("fire_ring", "Fire Ring", {
+        hitbox: new CircleHitbox(6),
         angularVelocity: {
-            min: -0.0125,
-            max: 0.0125
+            min: -0.0,
+            max: 0.0
         },
         depletePerMs: {
             health: 0.0045
         },
-        frame: "molotov_cocktail_particle",
+        frame: "fire_ring",
+        zIndex: ZIndexes.DeathMarkers
+    }),
+    createParticle("molotov_explosion_particle", "Molotov Explosion Particle", {
+        hitbox: new CircleHitbox(1),
+        angularVelocity: {
+            min: -0.001,
+            max: 0.001
+        },
+        velocity: {
+            min: {
+                x: -0.0003,
+                y: -0.0003
+            },
+            max: {
+                x: 0.0003,
+                y: 0.0003
+            }
+        },
+        depletePerMs: {
+            health: 0.0015
+        },
+        frame: "molotov_explosion_particle",
         zIndex: ZIndexes.DeathMarkers
     }),
     createParticle("smoke_grenade_particle", "Smoke Grenade Particle", {

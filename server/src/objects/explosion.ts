@@ -1,3 +1,4 @@
+import { create } from "node:domain";
 import { Explosions, type ExplosionDefinition } from "../../../common/src/definitions/explosions";
 import { CircleHitbox } from "../../../common/src/utils/hitbox";
 import { Angle, Geometry } from "../../../common/src/utils/math";
@@ -29,7 +30,6 @@ export class Explosion {
         // List of all near objects
         const objects = this.game.grid.intersectsHitbox(new CircleHitbox(this.definition.radius.max * 2, this.position));
         const damagedObjects = new Map<number, boolean>();
-
         for (let angle = -Math.PI; angle < Math.PI; angle += 0.1) {
             // All objects that collided with this line
             const lineCollisions: Array<{
@@ -107,7 +107,9 @@ export class Explosion {
                 }
             );
         }
-
+        if (this.definition.animation.particles !== undefined) {
+            this.game.addSyncedParticles(this.definition.animation.particles, this.position);
+        }
         if (this.definition.decal) {
             this.game.grid.addObject(
                 new Decal(

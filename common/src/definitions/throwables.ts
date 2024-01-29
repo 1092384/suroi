@@ -125,16 +125,16 @@ export const Throwables: ThrowableDefinition[] = [
         detonation: {
             explosion: "molotov_explosion",
             particles: {
-                type: "molotov_cocktail_particle",
-                count: 70,
+                type: "fire_ring",
+                count: 1,
                 deployAnimation: {
                     duration: 4000,
                     staggering: {
                         delay: 50,
-                        initialAmount: 20
+                        initialAmount: 1
                     }
                 },
-                spawnRadius: 20
+                spawnRadius: 1
             }
         },
         animation: {
