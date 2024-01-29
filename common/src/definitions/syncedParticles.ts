@@ -75,6 +75,7 @@ export interface SyncedParticleSpawnerDefinition {
             readonly delay: number
             readonly spawnPerGroup?: number
             readonly initialAmount?: number
+            readonly spawnRange?: Animated<Vector> | VectorSpecifier
         }
     }
     readonly spawnRadius: number
@@ -128,6 +129,16 @@ export const SyncedParticles = new ObjectDefinitions<SyncedParticleDefinition>([
             min: -0.0,
             max: 0.0
         },
+        velocity: {
+            min: {
+                x: -0.0000,
+                y: -0.0000
+            },
+            max: {
+                x: 0.0000,
+                y: 0.0000
+            }
+        },
         depletePerMs: {
             health: 0.0045
         },
@@ -137,9 +148,10 @@ export const SyncedParticles = new ObjectDefinitions<SyncedParticleDefinition>([
     createParticle("molotov_explosion_particle", "Molotov Explosion Particle", {
         hitbox: new CircleHitbox(1),
         angularVelocity: {
-            min: -0.001,
-            max: 0.001
+            min: -0.000,
+            max: 0.000
         },
+        lifetime: 4300,
         velocity: {
             min: {
                 x: -0.0003,
