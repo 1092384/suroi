@@ -1648,7 +1648,7 @@ const GunsRaw: RawGunDefinition[] = [
         idString: "p90",
         name: "P90",
         itemType: ItemType.Gun,
-        ammoType: "9mm",
+        ammoType: "45acp",
         ammoSpawnAmount: 200,
         capacity: 100,
         reloadTime: 2.9,
