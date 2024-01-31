@@ -1468,7 +1468,7 @@ const GunsRaw: RawGunDefinition[] = [
             ejectionDelay: 450
         },
         ballistics: {
-            damage: 80,
+            damage: 86,
             obstacleMultiplier: 1.5,
             speed: 0.4095,
             range: 1170,
