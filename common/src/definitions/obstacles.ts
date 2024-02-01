@@ -2436,6 +2436,49 @@ export const Obstacles = new ObjectDefinitions<ObstacleDefinition>(
             frames: {
                 particle: "window_particle"
             }
+        },
+
+        // Desert Rain
+
+        {
+            idString: "red_statue",
+            name: "Faction Statue Red",
+            material: "stone",
+            health: 200,
+            scale: {
+                spawnMin: 1,
+                spawnMax: 1,
+                destroy: 0.8
+            },
+            hitbox: RectangleHitbox.fromRect(25, 25),
+            rotationMode: RotationMode.Limited,
+            frames: {
+                particle: "flint_stone_particle",
+                residue: "flint_stone_residue"
+            },
+            particleVariations: 2,
+            hasLoot: true,
+            impenetrable: true
+        },
+        {
+            idString: "blue_statue",
+            name: "Faction Statue Blue",
+            material: "stone",
+            health: 200,
+            scale: {
+                spawnMin: 1,
+                spawnMax: 1,
+                destroy: 0.8
+            },
+            hitbox: RectangleHitbox.fromRect(25, 25),
+            rotationMode: RotationMode.Limited,
+            frames: {
+                particle: "flint_stone_particle",
+                residue: "flint_stone_residue"
+            },
+            particleVariations: 2,
+            hasLoot: true,
+            impenetrable: true
         }
     ]
 );

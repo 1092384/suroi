@@ -6,7 +6,7 @@ import { randomSign, randomVector } from "../utils/random";
 import { type FloorTypes } from "../utils/terrain";
 import { Vec, type Vector } from "../utils/vector";
 import { type DecalDefinition } from "./decals";
-import { type ObstacleDefinition, type RotationMode } from "./obstacles";
+import { type RotationMode, type ObstacleDefinition } from "./obstacles";
 
 interface BuildingObstacle {
     readonly idString: ReferenceTo<ObstacleDefinition> | Record<ReferenceTo<ObstacleDefinition>, number>
@@ -2395,6 +2395,33 @@ export const Buildings = new ObjectDefinitions<BuildingDefinition>([
             { idString: "box", position: Vec.create(26.2, -3.43), rotation: 0 },
             { idString: "box", position: Vec.create(28, 1.52), rotation: 0 },
             { idString: "barrel", position: Vec.create(-18.9, 14.62), rotation: 0 }
+        ]
+    },
+
+    // Desert Rain
+    {
+        idString: "statue_complex",
+        name: "Faction Statues Complex",
+        spawnHitbox: RectangleHitbox.fromRect(100, 25),
+        spawnMode: MapObjectSpawnMode.Grass,
+        rotationMode: 2,
+        groundGraphics: [
+            {
+                color: 0x934414,
+                hitbox: RectangleHitbox.fromRect(100, 25, Vec.create(0, 0))
+            }
+        ],
+        obstacles: [
+            {
+                idString: "red_statue",
+                position: Vec.create(-50, 0),
+                rotation: 0
+            },
+            {
+                idString: "blue_statue",
+                position: Vec.create(50, 0),
+                rotation: 0
+            }
         ]
     },
 

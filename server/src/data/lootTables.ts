@@ -411,6 +411,38 @@ export const LootTables: Record<string, LootTable> = {
             { tier: "healing_items", weight: 1.2 },
             { tier: "ammo", weight: 1 }
         ]
+    },
+
+    // Desert Rain
+    red_statue: {
+        min: 1,
+        max: 1,
+        loot: [
+            [
+                { item: "super90", weight: 1 }
+            ],
+            [
+                { item: "tactical_helmet", weight: 1 }
+            ],
+            [
+                { item: "machete", weight: 1 }
+            ]
+        ]
+    },
+    blue_statue: {
+        min: 1,
+        max: 1,
+        loot: [
+            [
+                { item: "an94", weight: 1 }
+            ],
+            [
+                { item: "tactical_helmet", weight: 1 }
+            ],
+            [
+                { item: "kukri", weight: 1 }
+            ]
+        ]
     }
 };
 

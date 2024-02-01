@@ -60,6 +60,7 @@ export const Maps: Record<string, MapDefinition> = {
         },
         buildings: {
             // station: 20,
+            statue_complex: 50,
             port_complex: 1,
             armory: 1,
             refinery: 1,
@@ -96,6 +97,8 @@ export const Maps: Record<string, MapDefinition> = {
             melee_crate: 1,
             gold_rock: 1,
             flint_stone: 20
+            // red_statue: 100,
+            // blue_statue: 100
         },
         loots: {
             ground_loot: 100
