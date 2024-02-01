@@ -619,7 +619,6 @@ export const LootTiers: Record<string, WeightedItem[]> = {
         { item: "sr25", weight: 1 },
         { item: "p90", weight: 1 },
         { item: "vector", weight: 1 },
-        { item: "super90", weight: 1 },
         { item: "vepr12", weight: 1 },
         { item: "mcx_spear", weight: 0.95 },
         { item: "mosin", weight: 0.95 },
