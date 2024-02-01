@@ -693,7 +693,7 @@ export const Obstacles = new ObjectDefinitions<ObstacleDefinition>(
                 falloff: 0.3
             },
             replaceWith: {
-                idString: { airdrop_crate: 0.6, gold_airdrop_crate: 0.4 },
+                idString: { airdrop_crate: 0.9, gold_airdrop_crate: 0.1 },
                 delay: 800
             },
             noResidue: true,
