@@ -60,7 +60,7 @@ export const Maps: Record<string, MapDefinition> = {
         },
         buildings: {
             // station: 20,
-            statue_complex: 50,
+            statue_complex: 10,
             port_complex: 1,
             armory: 1,
             refinery: 1,
