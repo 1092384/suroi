@@ -202,8 +202,8 @@ export const LootTables: Record<string, LootTable> = {
         ]
     },
     fridge: {
-        min: 3,
-        max: 4,
+        min: 4,
+        max: 6,
         loot: [
             { item: "cola", weight: 1 },
             { item: "blueberry_smoothie", weight: 0.01 }
@@ -530,12 +530,12 @@ export const LootTiers: Record<string, WeightedItem[]> = {
         { item: "hp18", weight: 1 },
         // { item: "mp40", weight: 1 },
         { item: "model_37", weight: 1 },
+        { item: "model_94", weight: 1 },
         { item: "m3k", weight: 0.8 },
         { item: "arx160", weight: 0.8 },
         { item: "flues", weight: 0.8 },
         // { item: "saf_200", weight: 0.75 },
         // { item: "cz75a", weight: 0.75 },
-        { item: "model_94", weight: 0.6 },
         { item: "m16a4", weight: 0.5 },
         { item: "lewis_gun", weight: 0.5 },
         // { item: "g19", weight: 0.45 },
