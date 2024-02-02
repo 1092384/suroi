@@ -1,9 +1,10 @@
 export const Config = {
     regions: {
         dev: { name: "Local Server", address: "127.0.0.1:63333", https: false },
-        ngrok: { name: "Special Server", address: "suroi15.dafox.box.ca", https: true }
+        sg: { name: "Singapore", address: "suroi15.dafox.box.ca", https: true },
+        nj: { name: "New Jersey", address: "islandrain.compositr.dev", https: true }
     },
-    defaultRegion: "ngrok",
+    defaultRegion: "nj",
     mode: "desert"
 } satisfies ConfigType as ConfigType;
 
