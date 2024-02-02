@@ -320,7 +320,7 @@ export const Obstacles = new ObjectDefinitions<ObstacleDefinition>(
                 spawnMax: 1,
                 destroy: 0.75
             },
-            hitbox: new CircleHitbox(5.5),
+            hitbox: new CircleHitbox(3),
             spawnHitbox: new CircleHitbox(15),
             rotationMode: RotationMode.Full,
             variations: 3,
@@ -2479,6 +2479,22 @@ export const Obstacles = new ObjectDefinitions<ObstacleDefinition>(
             particleVariations: 2,
             hasLoot: true,
             impenetrable: true
+        },
+        {
+            idString: "big_desert_tree",
+            name: "Big Desert Tree",
+            material: "tree",
+            health: 300,
+            scale: {
+                spawnMin: 0.9,
+                spawnMax: 1,
+                destroy: 0.5
+            },
+            hitbox: new CircleHitbox(5.5),
+            spawnHitbox: new CircleHitbox(15),
+            rotationMode: RotationMode.Full,
+            zIndex: ZIndexes.ObstaclesLayer4,
+            allowFlyover: FlyoverPref.Never
         }
     ]
 );
