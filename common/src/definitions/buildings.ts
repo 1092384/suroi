@@ -2404,7 +2404,7 @@ export const Buildings = new ObjectDefinitions<BuildingDefinition>([
         name: "Faction Statues Complex",
         spawnHitbox: RectangleHitbox.fromRect(200, 25),
         spawnMode: MapObjectSpawnMode.Grass,
-        rotationMode: 2,
+        rotationMode: 3,
         groundGraphics: [
             {
                 color: 0x934414,
@@ -2414,18 +2414,19 @@ export const Buildings = new ObjectDefinitions<BuildingDefinition>([
         obstacles: [
             {
                 idString: "red_statue",
-                position: Vec.create(-100, 0),
-                rotation: 0
+                position: Vec.create(-100, 0)
             },
             {
                 idString: "big_desert_tree",
-                position: Vec.create(0, -20),
-                rotation: 3
+                position: Vec.create(0, 0)
+            },
+            {
+                idString: "radio_crate",
+                position: Vec.create(0, 10)
             },
             {
                 idString: "blue_statue",
-                position: Vec.create(100, 0),
-                rotation: 0
+                position: Vec.create(100, 0)
             }
         ]
     },

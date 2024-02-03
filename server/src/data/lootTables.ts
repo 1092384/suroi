@@ -443,6 +443,18 @@ export const LootTables: Record<string, LootTable> = {
                 { item: "kukri", weight: 1 }
             ]
         ]
+    },
+    radio_crate: {
+        min: 2,
+        max: 2,
+        loot: [
+            [
+                { item: "radio", weight: 1 }
+            ],
+            [
+                { item: "frag_grenade", weight: 1 }
+            ]
+        ]
     }
 };
 

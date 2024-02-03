@@ -2451,7 +2451,7 @@ export const Obstacles = new ObjectDefinitions<ObstacleDefinition>(
                 destroy: 0.8
             },
             hitbox: RectangleHitbox.fromRect(25, 25),
-            rotationMode: RotationMode.Limited,
+            rotationMode: RotationMode.None,
             frames: {
                 particle: "flint_stone_particle",
                 residue: "flint_stone_residue"
@@ -2471,7 +2471,7 @@ export const Obstacles = new ObjectDefinitions<ObstacleDefinition>(
                 destroy: 0.8
             },
             hitbox: RectangleHitbox.fromRect(25, 25),
-            rotationMode: RotationMode.Limited,
+            rotationMode: RotationMode.None,
             frames: {
                 particle: "flint_stone_particle",
                 residue: "flint_stone_residue"
@@ -2495,6 +2495,25 @@ export const Obstacles = new ObjectDefinitions<ObstacleDefinition>(
             rotationMode: RotationMode.Full,
             zIndex: ZIndexes.ObstaclesLayer4,
             allowFlyover: FlyoverPref.Never
+        },
+        {
+            idString: "radio_crate",
+            name: "Radio Crate",
+            material: "crate",
+            health: 100,
+            scale: {
+                spawnMin: 1,
+                spawnMax: 1,
+                destroy: 0.6
+            },
+            hitbox: RectangleHitbox.fromRect(9.15, 6.3),
+            rotationMode: RotationMode.Limited,
+            allowFlyover: FlyoverPref.Always,
+            frames: {
+                particle: "crate_particle",
+                residue: "regular_crate_residue"
+            },
+            hasLoot: true
         }
     ]
 );
