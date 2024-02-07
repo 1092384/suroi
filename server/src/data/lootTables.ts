@@ -406,7 +406,7 @@ export const LootTables: Record<string, LootTable> = {
             { item: "g19", weight: 0.05 }
         ]
     },
-    mobile_home_sink: {
+    sink_with_cabinet: {
         min: 1,
         max: 1,
         loot: [
