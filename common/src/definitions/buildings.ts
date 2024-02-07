@@ -2401,7 +2401,7 @@ export const Buildings = new ObjectDefinitions<BuildingDefinition>([
             { idString: "mobile_home_wall_3", position: Vec.create(-9.35, 8.32), rotation: 0 },
             { idString: "small_bed", position: Vec.create(13.55, -5.72), rotation: 3 },
             { idString: "small_drawer", position: Vec.create(17.45, 3.27), rotation: 3 },
-            { idString: "sink_with_drawer", position: Vec.create(-12.8, 3.4), rotation: 2 },
+            { idString: "sink_with_cabinet", position: Vec.create(-12.8, 3.4), rotation: 2 },
             { idString: "compact_stove", position: Vec.create(-3.75, 3.57), rotation: 2 },
             { idString: "tire", position: Vec.create(-21.25, 4.85), rotation: 0 },
             { idString: "mobile_home_window", position: Vec.create(-5.6, -10.42), rotation: 0 },
