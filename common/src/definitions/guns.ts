@@ -907,7 +907,7 @@ const GunsRaw: RawGunDefinition[] = [
         idString: "vector",
         name: "Vector",
         itemType: ItemType.Gun,
-        ammoType: "9mm",
+        ammoType: "45acp",
         ammoSpawnAmount: 99,
         capacity: 33,
         reloadTime: 1.7,
@@ -1662,9 +1662,10 @@ const GunsRaw: RawGunDefinition[] = [
         moveSpread: 10,
         length: 7.1,
         fists: {
-            left: Vec.create(85, -6),
+            left: Vec.create(40, 0),
             right: Vec.create(40, 0),
             rightZIndex: 4,
+            leftZIndex: 4,
             animationDuration: 100
         },
         casingParticles: {
@@ -1676,6 +1677,12 @@ const GunsRaw: RawGunDefinition[] = [
             obstacleMultiplier: 1,
             speed: 0.20,
             range: 70
+        },
+        dual: {
+            leftRightOffset: 1,
+            fireDelay: 25,
+            capacity: 200,
+            reloadTime: 5.8
         }
     },
 
