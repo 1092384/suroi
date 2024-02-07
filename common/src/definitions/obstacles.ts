@@ -2115,8 +2115,8 @@ export const Obstacles = new ObjectDefinitions<ObstacleDefinition>(
             }
         },
         {
-            idString: "port_fence",
-            name: "Port Fence",
+            idString: "metal_fence",
+            name: "Metal Fence",
             material: "fence",
             health: 40,
             scale: {
@@ -2132,8 +2132,8 @@ export const Obstacles = new ObjectDefinitions<ObstacleDefinition>(
             }
         },
         {
-            idString: "port_fence_side",
-            name: "Port Fence Side",
+            idString: "metal_fence_corner",
+            name: "Metal Fence Corner",
             material: "fence",
             health: 40,
             scale: {
@@ -2361,8 +2361,8 @@ export const Obstacles = new ObjectDefinitions<ObstacleDefinition>(
         makeMobileHomeWall("2", RectangleHitbox.fromRect(10.8, 1.68)),
         makeMobileHomeWall("3", RectangleHitbox.fromRect(20.43, 1.68)),
         {
-            idString: "mobile_home_bed",
-            name: "Mobile Home Bed",
+            idString: "small_bed",
+            name: "Small Bed",
             material: "wood",
             health: 100,
             scale: {
@@ -2379,8 +2379,8 @@ export const Obstacles = new ObjectDefinitions<ObstacleDefinition>(
             }
         },
         {
-            idString: "mobile_home_sink",
-            name: "Mobile Home Sink",
+            idString: "sink_with_cabinet",
+            name: "Sink With Cabinet",
             material: "wood",
             health: 100,
             scale: {
@@ -2398,8 +2398,8 @@ export const Obstacles = new ObjectDefinitions<ObstacleDefinition>(
             }
         },
         {
-            idString: "mobile_home_stove",
-            name: "Mobile Home Stove",
+            idString: "compact_stove",
+            name: "Compact Stove",
             material: "metal",
             health: 140,
             scale: {
@@ -2418,8 +2418,8 @@ export const Obstacles = new ObjectDefinitions<ObstacleDefinition>(
             reflectBullets: true
         },
         {
-            idString: "mobile_home_tire",
-            name: "Mobile Home Tire",
+            idString: "tire",
+            name: "Tire",
             material: "stone",
             health: 200,
             scale: {
