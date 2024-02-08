@@ -1677,13 +1677,13 @@ const GunsRaw: RawGunDefinition[] = [
             obstacleMultiplier: 1,
             speed: 0.20,
             range: 70
-        },
-        dual: {
-            leftRightOffset: 1,
-            fireDelay: 25,
-            capacity: 200,
-            reloadTime: 5.8
         }
+        // dual: {
+        //     leftRightOffset: 1,
+        //     fireDelay: 25,
+        //     capacity: 200,
+        //     reloadTime: 5.8
+        // }
     },
 
     // .45 ACP
