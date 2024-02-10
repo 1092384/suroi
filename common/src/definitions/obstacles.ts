@@ -2455,6 +2455,6 @@ export const Obstacles = new ObjectDefinitions<ObstacleDefinition>(
             frames: {
                 particle: "window_particle"
             }
-        }
+        },
     ]
 );

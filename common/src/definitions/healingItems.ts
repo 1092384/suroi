@@ -6,6 +6,7 @@ export interface HealingItemDefinition extends ItemDefinition {
     readonly restoreAmount: number
     readonly useTime: number
     readonly useText: string
+    readonly hideUnlessPresent?: boolean
 }
 
 export enum HealType {
@@ -32,6 +33,25 @@ export const HealingItems = new ObjectDefinitions<HealingItemDefinition>([
         useTime: 6,
         useText: "Using"
     },
+    //valentines mode
+    {
+        idString: "candy",
+        name: "Candy",
+        itemType: ItemType.Healing,
+        healType: HealType.Adrenaline,
+        restoreAmount: 30,
+        useTime: 3,
+        useText: "Eating"
+    },
+    {
+        idString: "chocolate_box",
+        name: "Chocolate Box",
+        itemType: ItemType.Healing,
+        healType: HealType.Adrenaline,
+        restoreAmount: 60,
+        useTime: 5,
+        useText: "Eating"
+    },
     {
         idString: "cola",
         name: "Cola",
@@ -39,7 +59,9 @@ export const HealingItems = new ObjectDefinitions<HealingItemDefinition>([
         healType: HealType.Adrenaline,
         restoreAmount: 25,
         useTime: 3,
-        useText: "Drinking"
+        useText: "Drinking",
+        //valentines mode
+        hideUnlessPresent: true
     },
     {
         idString: "tablets",
@@ -48,6 +70,11 @@ export const HealingItems = new ObjectDefinitions<HealingItemDefinition>([
         healType: HealType.Adrenaline,
         restoreAmount: 50,
         useTime: 5,
-        useText: "Taking"
-    }
+        useText: "Taking",
+        //valentines mode
+        hideUnlessPresent: true
+    },
+
+
+
 ]);

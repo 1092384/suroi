@@ -20,6 +20,10 @@ export const Backpacks = new ObjectDefinitions<BackpackDefinition>([
             medikit: 1,
             cola: 2,
             tablets: 1,
+            // valentines mode
+            candy: 4,
+            chocolate_box: 1,
+
             "12g": 15,
             "556mm": 90,
             "762mm": 90,
@@ -42,6 +46,10 @@ export const Backpacks = new ObjectDefinitions<BackpackDefinition>([
             medikit: 2,
             cola: 5,
             tablets: 2,
+            // valentines mode
+            candy: 8,
+            chocolate_box: 2,
+                        
             "12g": 30,
             "556mm": 180,
             "762mm": 180,
@@ -63,6 +71,10 @@ export const Backpacks = new ObjectDefinitions<BackpackDefinition>([
             medikit: 3,
             cola: 10,
             tablets: 3,
+            // valentines mode
+            candy: 12,
+            chocolate_box: 3,
+               
             "12g": 60,
             "556mm": 240,
             "762mm": 240,
@@ -84,6 +96,10 @@ export const Backpacks = new ObjectDefinitions<BackpackDefinition>([
             medikit: 4,
             cola: 15,
             tablets: 4,
+            // valentines mode
+            candy: 16,
+            chocolate_box: 4,
+               
             "12g": 90,
             "556mm": 300,
             "762mm": 300,

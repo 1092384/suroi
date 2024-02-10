@@ -211,9 +211,12 @@ export const LootTables: Record<string, LootTable> = {
     },
     fridge: {
         min: 2,
-        max: 3,
+        max: 4,
         loot: [
-            { item: "cola", weight: 1 }
+            // { item: "cola", weight: 1 },
+            // valentines mode
+            { item: "candy", count: 2, weight: 1 },
+            { item: "chocolate_box", weight: 1}
         ]
     },
     washing_machine: {
@@ -446,9 +449,15 @@ export const LootTiers: Record<string, WeightedItem[]> = {
     ],
     healing_items: [
         { item: "gauze", count: 5, weight: 3 },
+        { item: "medikit", weight: 1 },
+        /** 
         { item: "cola", weight: 2 },
         { item: "tablets", weight: 1 },
-        { item: "medikit", weight: 1 }
+        */
+       //valentines mode
+       { item: "candy", count: 2, weight: 2 },
+       { item: "chocolate_box", weight: 1 },
+
     ],
     scopes: [
         { item: "2x_scope", weight: 1 },
@@ -507,8 +516,14 @@ export const LootTiers: Record<string, WeightedItem[]> = {
         { item: "tango_51", weight: 0.004 }
     ],
     special_healing_items: [
+        /** 
         { item: "cola", weight: 3 },
         { item: "tablets", weight: 1 },
+        */
+       // valentines mode
+        { item: "candy", count: 2, weight: 3 },
+        { item: "chocolate_box", weight: 1 },
+
         { item: "medikit", weight: 1 },
         { item: "gauze", count: 5, weight: 3 }
     ],
@@ -548,8 +563,13 @@ export const LootTiers: Record<string, WeightedItem[]> = {
     airdrop_healing_items: [
         { item: "gauze", count: 5, weight: 1.5 },
         { item: "medikit", weight: 1 },
+        /** 
         { item: "cola", weight: 1 },
         { item: "tablets", weight: 1 }
+        */
+       //valentines mode
+       { item: "candy", count: 2, weight: 1 },
+       { item: "chocolate_box", weight: 1 }
     ],
     airdrop_skins: [
         { item: null, weight: 1 },

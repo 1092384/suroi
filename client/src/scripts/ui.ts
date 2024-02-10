@@ -637,7 +637,7 @@ Video evidence is required.`)) {
     }
 
     for (const item of HealingItems) {
-        $("#healing-items-container").append(`
+        $(`#healing-items-container`).append(`
         <div class="inventory-slot item-slot" id="${item.idString}-slot">
             <img class="item-image" src="./img/game/loot/${item.idString}.svg" draggable="false">
             <span class="item-count" id="${item.idString}-count">0</span>
