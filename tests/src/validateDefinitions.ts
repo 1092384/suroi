@@ -1180,6 +1180,21 @@ logger.indent("Validating explosions", () => {
                 });
             });
 
+            tester.assertNoPointlessValue({
+                obj: explosion,
+                field: "forceMultiplier",
+                defaultValue: 1,
+                baseErrorPath: errorPath
+            });
+
+            if (explosion.forceMultiplier !== 0) {
+                tester.assertIsFiniteRealNumber({
+                    obj: explosion,
+                    field: "forceMultiplier",
+                    baseErrorPath: errorPath
+                });
+            }
+
             logger.indent("Validating animation", () => {
                 const errorPath2 = tester.createPath(errorPath, "animation");
 
@@ -2750,7 +2765,7 @@ logger.indent("Validating throwables", () => {
                 });
             }
 
-            logger.indent("Validating detontation", () => {
+            logger.indent("Validating detonation", () => {
                 const detonation = throwable.detonation;
                 const errorPath2 = tester.createPath(errorPath, "detonation");
 
@@ -2767,6 +2782,13 @@ logger.indent("Validating throwables", () => {
                 if (detonation.particles !== undefined) {
                     validators.syncedParticleSpawner(errorPath2, detonation.particles);
                 }
+            });
+
+            tester.assertNoPointlessValue({
+                obj: throwable,
+                field: "detonateOnImpact",
+                defaultValue: false,
+                baseErrorPath: errorPath
             });
 
             logger.indent("Validating animations", () => {

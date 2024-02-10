@@ -35,11 +35,16 @@ export type ThrowableDefinition = InventoryItemDefinition & {
         readonly explosion?: ReferenceTo<ExplosionDefinition>
         readonly particles?: SyncedParticleSpawnerDefinition
     }
+    readonly detonateOnImpact?: boolean
     readonly animation: {
-        readonly pinImage: string
         readonly liveImage: string
-        readonly leverImage: string
+        readonly leverImage?: string
         readonly cook: {
+            readonly pinImage?: string | {
+                readonly frame: string
+                readonly position?: Vector
+                readonly angleOffset?: number
+            }
             readonly cookingImage?: string
             readonly leftFist: Vector
             readonly rightFist: Vector
@@ -82,11 +87,64 @@ export const Throwables: ThrowableDefinition[] = [
         detonation: {
             explosion: "frag_explosion"
         },
+        detonateOnImpact: true,
         animation: {
-            pinImage: "proj_frag_pin",
             liveImage: "proj_frag",
             leverImage: "proj_frag_lever",
             cook: {
+                pinImage: "proj_frag_pin",
+                leftFist: Vec.create(2.5, 0),
+                rightFist: Vec.create(-0.5, 2.15)
+            },
+            throw: {
+                leftFist: Vec.create(1.9, -1.75),
+                rightFist: Vec.create(4, 2.15)
+            }
+        }
+    },
+    {
+        idString: "molotov_cocktail",
+        name: "Molotov Cocktail",
+        itemType: ItemType.Throwable,
+        speedMultiplier: 0.92,
+        cookSpeedMultiplier: 0.7,
+        hitboxRadius: 1,
+        impactDamage: 1,
+        obstacleMultiplier: 20,
+        fuseTime: 4000,
+        cookTime: 150,
+        throwTime: 150,
+        cookable: true,
+        detonateOnImpact: true,
+        maxThrowDistance: 64,
+        image: {
+            position: Vec.create(60, 43),
+            angle: 60
+        },
+        speedCap: 0.15,
+        detonation: {
+            explosion: "molotov_explosion",
+            particles: {
+                type: "fire_ring",
+                count: 1,
+                deployAnimation: {
+                    duration: 4000,
+                    staggering: {
+                        delay: 50,
+                        initialAmount: 1
+                    }
+                },
+                spawnRadius: 1
+            }
+        },
+        animation: {
+            liveImage: "proj_molotov",
+            cook: {
+                pinImage: {
+                    frame: "proj_molotov_pin",
+                    position: Vec.create(30, -10),
+                    angleOffset: 90
+                },
                 leftFist: Vec.create(2.5, 0),
                 rightFist: Vec.create(-0.5, 2.15)
             },
@@ -130,10 +188,10 @@ export const Throwables: ThrowableDefinition[] = [
             }
         },
         animation: {
-            pinImage: "proj_smoke_pin",
             liveImage: "proj_smoke",
             leverImage: "proj_smoke_lever",
             cook: {
+                pinImage: "proj_smoke_pin",
                 cookingImage: "proj_smoke_nopin",
                 leftFist: Vec.create(2.5, 0),
                 rightFist: Vec.create(-0.5, 2.15)

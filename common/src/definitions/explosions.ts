@@ -1,6 +1,6 @@
 import { ObjectDefinitions, type BaseBulletDefinition, type ObjectDefinition, type ReferenceTo } from "../utils/objectDefinitions";
 import { type DecalDefinition } from "./decals";
-
+import { type SyncedParticleSpawnerDefinition } from "./syncedParticles";
 export interface ExplosionDefinition extends ObjectDefinition {
     readonly damage: number
     readonly obstacleMultiplier: number
@@ -12,10 +12,12 @@ export interface ExplosionDefinition extends ObjectDefinition {
         readonly duration: number
         readonly intensity: number
     }
+    readonly forceMultiplier?: number
     readonly animation: {
         readonly duration: number
         readonly tint: number | `#${string}`
         readonly scale: number
+        readonly particles?: SyncedParticleSpawnerDefinition
     }
     readonly sound?: string // TODO: move the barrel and super barrel destroy sounds to explosion sounds
 
@@ -253,6 +255,49 @@ export const Explosions = new ObjectDefinitions<ExplosionDefinition>(
             },
             sound: "frag_grenade",
             decal: "frag_explosion_decal"
+        },
+        {
+            idString: "molotov_explosion",
+            name: "Molotov Explosion",
+            damage: 10,
+            obstacleMultiplier: 1.15,
+            radius: {
+                min: 1,
+                max: 4
+            },
+            cameraShake: {
+                duration: 100,
+                intensity: 3
+            },
+            forceMultiplier: 0,
+            animation: {
+                duration: 1000,
+                tint: 0x91140b,
+                scale: 1.5,
+                particles: {
+                    type: "molotov_explosion_particle",
+                    count: 50,
+                    deployAnimation: {
+                        duration: 4300,
+                        staggering: {
+                            delay: 20,
+                            initialAmount: 40
+                        }
+                    },
+                    spawnRadius: 12
+                }
+            },
+            shrapnelCount: 3,
+            ballistics: {
+                damage: 15,
+                obstacleMultiplier: 1,
+                speed: 0.08,
+                range: 20,
+                rangeVariance: 1,
+                shrapnel: true
+            },
+            sound: "frag_grenade",
+            decal: "molotov_explosion_decal"
         },
         {
             idString: "smoke_explosion",
