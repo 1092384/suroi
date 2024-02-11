@@ -62,3 +62,8 @@ Production builds are served using [NGINX](https://nginx.org). A sample configur
 
 ## Self-hosting
 Visit [the wiki](https://github.com/HasangerGames/suroi/wiki/Self%E2%80%90hosting) for details on how to self-host.
+
+# TODO
+- Make Molotov explosion particles (the fire one) spawn more like player adrenaline/health particles, as well as making them client side
+- Finish reskinning valentines mode
+- Figure out how to make medikit and cola disappear from ui during valentines mode
