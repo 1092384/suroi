@@ -1685,6 +1685,44 @@ const GunsRaw: RawGunDefinition[] = [
         //     reloadTime: 5.8
         // }
     },
+    {
+        idString: "vickers",
+        name: "Vickers No.2 Mk.1",
+        itemType: ItemType.Gun,
+        ammoType: "762mm",
+        ammoSpawnAmount: 200,
+        capacity: 100,
+        reloadTime: 4.2,
+        fireDelay: 80,
+        switchDelay: 400,
+        speedMultiplier: 0.9,
+        recoilMultiplier: 0.65,
+        recoilDuration: 175,
+        fireMode: FireMode.Auto,
+        shotSpread: 3,
+        moveSpread: 5,
+        length: 7,
+        fists: {
+            left: Vec.create(105, -3),
+            right: Vec.create(40, 0),
+            rightZIndex: 4,
+            animationDuration: 100
+        },
+        image: { position: Vec.create(80, 0) },
+        casingParticles: {
+            position: Vec.create(4, 0.6)
+        },
+        ballistics: {
+            damage: 14.25,
+            obstacleMultiplier: 2,
+            speed: 0.3,
+            range: 180,
+            tracer: {
+                width: 1.1,
+                length: 1.4
+            }
+        }
+    },
 
     // .45 ACP
 

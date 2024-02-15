@@ -376,10 +376,9 @@ export class Player extends BaseGameObject<ObjectCategory.Player> {
             this.inventory.items.setItem("15x_scope", 1);
             this.inventory.scope = "4x_scope";
         }
-        // this.inventory.addOrReplaceWeapon(0, "vector");
-        // this.inventory.addOrReplaceWeapon(1, "dual_p90");
-        // this.inventory.items.setItem("45acp", 1_000);
-        // this.inventory.items.setItem("12g", 1_000);
+        // this.inventory.addOrReplaceWeapon(0, "vickers");
+        // this.inventory.addOrReplaceWeapon(1, "pkp");
+        // this.inventory.items.setItem("762mm", 300);
 
         this.updateAndApplyModifiers();
         this.dirty.weapons = true;
