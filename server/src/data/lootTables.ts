@@ -536,7 +536,7 @@ export const LootTiers: Record<string, WeightedItem[]> = {
     special_guns: [
         { item: "radio", weight: 2.5 },
         // { item: "micro_uzi", weight: 1.25 },
-        { item: "tommy", weight: 1.2 },
+        { item: "tommy", weight: 1.3 },
         { item: "ak47", weight: 1.1 },
         { item: "aug", weight: 1.05 },
         { item: "hp18", weight: 1 },
@@ -559,11 +559,11 @@ export const LootTiers: Record<string, WeightedItem[]> = {
         { item: "mini14", weight: 0.05 },
         { item: "bar", weight: 0.05 },
         { item: "mcx_spear", weight: 0.05 },
-        { item: "m249", weight: 0.015 },
-        { item: "pkp", weight: 0.015 },
         { item: "stoner_63", weight: 0.01 },
         { item: "mosin", weight: 0.01 },
         { item: "tango_51", weight: 0.004 },
+        { item: "m249", weight: 0.004 },
+        { item: "pkp", weight: 0.004 },
         { item: "sv98", weight: 0.004 },
         { item: "awms", weight: 0.0004 },
         { item: "m134", weight: 0.0004 }
