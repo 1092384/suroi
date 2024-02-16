@@ -393,15 +393,14 @@ export const LootTables: Record<string, LootTable> = {
         min: 1,
         max: 1,
         loot: [
-            { item: "pkp", weight: 2 },
-            { item: "m249", weight: 2 },
-            { item: "vector", weight: 1 },
-            { item: "p90", weight: 1 },
-            { item: "m134", weight: 0.1 },
+            // { item: "pkp", weight: 2 },
+            // { item: "m249", weight: 2 },
+            // { item: "vector", weight: 1 },
+            { item: "m134", weight: 1 },
             // { item: "vector", weight: 3 },
             // { item: "arx160", weight: 1 },
             // { item: "vepr12", weight: 1 },
-            { item: "g19", weight: 0.05 }
+            { item: "g19", weight: 0.005 }
         ]
     },
     mobile_home_sink: {
@@ -493,7 +492,6 @@ export const LootTiers: Record<string, WeightedItem[]> = {
         // { item: "vector", weight: 0.004 },
         { item: "tango_51", weight: 0.002 },
         { item: "sv98", weight: 0.001 },
-        { item: "m134", weight: 0.0001 },
         { item: "awms", weight: 0.0001 }
     ],
     healing_items: [
@@ -565,8 +563,7 @@ export const LootTiers: Record<string, WeightedItem[]> = {
         { item: "m249", weight: 0.003 },
         { item: "pkp", weight: 0.003 },
         { item: "sv98", weight: 0.002 },
-        { item: "awms", weight: 0.0004 },
-        { item: "m134", weight: 0.0004 }
+        { item: "awms", weight: 0.0004 }
     ],
     special_healing_items: [
         { item: "cola", weight: 3 },
@@ -647,7 +644,6 @@ export const LootTiers: Record<string, WeightedItem[]> = {
         { item: "pkp", weight: 0.5 },
         { item: "m249", weight: 0.5 },
         { item: "barrett", weight: 0.2 },
-        { item: "m134", weight: 0.2 },
         { item: "awms", weight: 0.05 },
         { item: "g19", weight: 0.0005 }
     ],
@@ -684,7 +680,6 @@ export const LootTiers: Record<string, WeightedItem[]> = {
         { item: "tango_51", weight: 0.3 },
         { item: "sv98", weight: 0.1 },
         { item: "g19", weight: 0.00001 },
-        { item: "pkp", weight: 0.09 },
-        { item: "m134", weight: 0.07 }
+        { item: "pkp", weight: 0.09 }
     ]
 };
