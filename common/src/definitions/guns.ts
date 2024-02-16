@@ -1304,7 +1304,7 @@ const GunsRaw: RawGunDefinition[] = [
         switchDelay: 750,
         fireDelay: 100,
         ballistics: {
-            damage: 18,
+            damage: 19,
             obstacleMultiplier: 2,
             range: 200 * 2.25,
             speed: 0.27
@@ -1338,7 +1338,7 @@ const GunsRaw: RawGunDefinition[] = [
         switchDelay: 750,
         fireDelay: 120,
         ballistics: {
-            damage: 17.5,
+            damage: 18,
             obstacleMultiplier: 2,
             range: 275 * 2.25,
             speed: 0.2565
@@ -1372,7 +1372,7 @@ const GunsRaw: RawGunDefinition[] = [
         switchDelay: 750,
         fireDelay: 80,
         ballistics: {
-            damage: 14,
+            damage: 15,
             obstacleMultiplier: 2,
             range: 220 * 2.25,
             speed: 0.28125
@@ -1406,7 +1406,7 @@ const GunsRaw: RawGunDefinition[] = [
         switchDelay: 900,
         fireDelay: 55,
         ballistics: {
-            damage: 10,
+            damage: 10.8,
             obstacleMultiplier: 2,
             range: 200 * 2.25,
             speed: 0.2925
@@ -1468,7 +1468,7 @@ const GunsRaw: RawGunDefinition[] = [
             ejectionDelay: 450
         },
         ballistics: {
-            damage: 86,
+            damage: 89,
             obstacleMultiplier: 1.5,
             speed: 0.4095,
             range: 1170,
@@ -1508,7 +1508,7 @@ const GunsRaw: RawGunDefinition[] = [
             ejectionDelay: 700
         },
         ballistics: {
-            damage: 180,
+            damage: 185,
             obstacleMultiplier: 1.5,
             speed: 0.306,
             range: 675,
@@ -1548,7 +1548,7 @@ const GunsRaw: RawGunDefinition[] = [
             position: Vec.create(4, 0.6)
         },
         ballistics: {
-            damage: 77,
+            damage: 80,
             obstacleMultiplier: 1,
             speed: 0.2655,
             range: 135,
@@ -1591,7 +1591,7 @@ const GunsRaw: RawGunDefinition[] = [
             position: Vec.create(4, 0.6)
         },
         ballistics: {
-            damage: 17.5,
+            damage: 19,
             obstacleMultiplier: 1,
             speed: 0.2475,
             range: 675
@@ -1757,7 +1757,7 @@ const GunsRaw: RawGunDefinition[] = [
             ejectionDelay: 500
         },
         ballistics: {
-            damage: 44,
+            damage: 49,
             obstacleMultiplier: 1.33,
             speed: 0.351,
             range: 394,
@@ -1796,7 +1796,7 @@ const GunsRaw: RawGunDefinition[] = [
             position: Vec.create(4, 0.6)
         },
         ballistics: {
-            damage: 12,
+            damage: 12.9,
             obstacleMultiplier: 1,
             speed: 0.25,
             range: 120
@@ -1833,7 +1833,7 @@ const GunsRaw: RawGunDefinition[] = [
             ejectionDelay: 500
         },
         ballistics: {
-            damage: 62,
+            damage: 64,
             obstacleMultiplier: 1,
             speed: 0.21,
             range: 150,
