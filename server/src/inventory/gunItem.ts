@@ -19,7 +19,7 @@ export class GunItem extends InventoryItem<GunDefinition> {
 
     ammo = 0;
 
-    private _shots = 0;
+    _shots = 0;
 
     private _reloadTimeout?: Timeout;
 

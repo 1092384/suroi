@@ -52,6 +52,7 @@ export class ReloadAction extends Action {
                 : this.item.definition.capacity - this.item.ammo
         );
         this.item.ammo += difference;
+        this.item._shots = 0;
         items.decrementItem(definition.ammoType, difference);
 
         if (definition.singleReload) { // this is to chain single reloads together
