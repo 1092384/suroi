@@ -21,6 +21,7 @@ type BaseGunDefinition = InventoryItemDefinition & {
     readonly recoilDuration: number
     readonly shotSpread: number
     readonly moveSpread: number
+    readonly firstShotAccuracy?: boolean
     readonly jitterRadius?: number // Jitters the bullet position, mainly for shotguns
     readonly consistentPatterning?: boolean
 
@@ -1096,6 +1097,7 @@ const GunsRaw: RawGunDefinition[] = [
         switchDelay: 400,
         speedMultiplier: 0.92,
         recoilMultiplier: 0.75,
+        firstShotAccuracy: true,
         recoilDuration: 200,
         fireMode: FireMode.Single,
         shotSpread: 1,
