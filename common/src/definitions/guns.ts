@@ -919,9 +919,9 @@ const GunsRaw: RawGunDefinition[] = [
         fireMode: FireMode.Auto,
         shotSpread: 2,
         moveSpread: 7,
-        length: 7.1,
+        length: 6.3,
         fists: {
-            left: Vec.create(85, -6),
+            left: Vec.create(85, -4),
             right: Vec.create(40, 0),
             rightZIndex: 4,
             animationDuration: 100
@@ -929,7 +929,7 @@ const GunsRaw: RawGunDefinition[] = [
         casingParticles: {
             position: Vec.create(4.5, 0.6)
         },
-        image: { position: Vec.create(80, 0) },
+        image: { position: Vec.create(90, 0) },
         ballistics: {
             damage: 6.75,
             obstacleMultiplier: 1,
