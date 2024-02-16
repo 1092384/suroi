@@ -1539,7 +1539,7 @@ export const Obstacles = new ObjectDefinitions<ObstacleDefinition>(
         makeGunMount("gun_mount_mcx_spear", "Gun Mount MCX Spear"),
         makeGunMount("gun_mount_stoner_63", "Gun Mount Stoner 63"),
         makeGunMount("gun_mount_vepr12", "Gun Mount Vepr-12"),
-        makeGunMount("gun_mount_model37", "Gun Mount Model 37"),
+        makeGunMount("gun_mount_model_37", "Gun Mount Model 37"),
         makeGunMount("gun_mount_flues", "Gun Mount Flues"),
         makeGunMount("gun_mount_maul", "Gun Mount Maul", new HitboxGroup(
             RectangleHitbox.fromRect(5.05, 1, Vec.create(0, -1.3)),
