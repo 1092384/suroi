@@ -640,7 +640,8 @@ export const LootTiers: Record<string, WeightedItem[]> = {
     ],
     airdrop_melee: [
         { item: null, weight: 1 },
-        { item: "kbar", weight: 0.1 }
+        { item: "kbar", weight: 0.1 },
+        { item: "maul", weight: 0.03 }
     ],
     airdrop_guns: [
         { item: "delisle", weight: 1 },
