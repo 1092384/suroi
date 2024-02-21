@@ -63,18 +63,6 @@ export const Modes: ModeDefinition[] = [
         specialMenuMusic: true,
         reskin: "winter",
         bulletTrailAdjust: "hsl(0, 50%, 80%)"
-    },
-    {
-        idString: "valentines",
-        colors :{
-            grass: "hsl(113, 42%, 42%)",
-            water: "hsl(211, 63%, 42%)",
-            border: "hsl(211, 63%, 30%)",
-            beach: "hsl(40, 39%, 55%)",
-            riverBank: "hsl(33, 50%, 30%)",
-            gas: "hsla(17, 100%, 50%, 0.55)"
-        },
-        reskin: "valentines"
     }
 ];
 
@@ -113,11 +101,6 @@ export const Reskins: Record<string, ReskinDefinition> = {
         ],
         sounds: [
             "airdrop_plane"
-        ]
-    },
-    valentines: {
-        textures: [
-            "table", "bookshelf_1", "bookshelf_2", "used_toilet"
         ]
     }
 };

@@ -33,25 +33,6 @@ export const HealingItems = new ObjectDefinitions<HealingItemDefinition>([
         useTime: 6,
         useText: "Using"
     },
-    //valentines mode
-    {
-        idString: "candy",
-        name: "Candy",
-        itemType: ItemType.Healing,
-        healType: HealType.Adrenaline,
-        restoreAmount: 30,
-        useTime: 3,
-        useText: "Eating"
-    },
-    {
-        idString: "chocolate_box",
-        name: "Chocolate Box",
-        itemType: ItemType.Healing,
-        healType: HealType.Adrenaline,
-        restoreAmount: 60,
-        useTime: 5,
-        useText: "Eating"
-    },
     {
         idString: "cola",
         name: "Cola",
