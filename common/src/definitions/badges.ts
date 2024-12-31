@@ -5,23 +5,28 @@ export interface BadgeDefinition extends ObjectDefinition {
 }
 
 const badge = createTemplate<BadgeDefinition>()((name: string, roles: string[] = []) => ({
-    idString: name.toLowerCase().replace(/ /g, "_"),
+    idString: `bdg_${name.toLowerCase().replace(/ /g, "_")}`,
     name,
     roles
 }));
 
-export const Badges = ObjectDefinitions.create<BadgeDefinition>([
-    badge(["Developr", ["developr", "eipi", "pap", "error", "limenade"]]),
+export const Badges = ObjectDefinitions.create<BadgeDefinition>("Badges", [
+    // Roles
+    badge(["Developr", ["developr", "pap", "error", "limenade"]]),
+    badge(["Dev Managr", ["solstice"]]),
     badge(["Designr", ["designr"]]),
     badge(["Lead Designr", ["lead_designr"]]),
     badge(["VIP Designr", ["vip_designr"]]),
     badge(["Composr", ["composr"]]),
+    badge(["Sound Designr", ["sound_designr"]]),
     badge(["Lead Composr", ["lead_composr"]]),
     badge(["Moderatr", ["moderatr"]]),
-    badge(["Administratr", ["administratr", "katie", "error"]]),
-    badge(["Youtubr", ["youtubr", "123op"]]),
-    badge(["Boostr", ["boostr"]]),
+    badge(["Administratr", ["administratr", "error"]]),
+    badge(["Content Creatr", ["content_creatr"]]),
+    badge(["Donatr", ["donatr"]]),
     badge(["Ownr", ["hasanger"]]),
+
+    // Player
     badge(["Bleh"]),
     badge(["Froog"]),
     badge(["AEGIS Logo"]),

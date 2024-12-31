@@ -1,17 +1,18 @@
 import { Layer, ObjectCategory } from "@common/constants";
 import { FlyoverPref } from "@common/definitions/obstacles";
+import { PerkIds } from "@common/definitions/perks";
 import { type ThrowableDefinition } from "@common/definitions/throwables";
 import { CircleHitbox, Hitbox, HitboxType, RectangleHitbox, type GroupHitbox } from "@common/utils/hitbox";
 import { Angle, Collision, Numeric } from "@common/utils/math";
 import { type FullData } from "@common/utils/objectsSerializations";
 import { FloorTypes } from "@common/utils/terrain";
 import { Vec, type Vector } from "@common/utils/vector";
-
 import { type Game } from "../game";
 import { type ThrowableItem } from "../inventory/throwableItem";
-import { BaseGameObject, type GameObject } from "./gameObject";
-import { Obstacle } from "./obstacle";
 import { Building } from "./building";
+import { BaseGameObject, type DamageParams, type GameObject } from "./gameObject";
+import { Obstacle } from "./obstacle";
+import { equalLayer } from "@common/utils/layer";
 
 const enum Drag {
     Normal = 0.001,
@@ -19,14 +20,19 @@ const enum Drag {
 }
 
 export class ThrowableProjectile extends BaseGameObject.derive(ObjectCategory.ThrowableProjectile) {
-    override readonly fullAllocBytes = 16;
-    override readonly partialAllocBytes = 4;
+    override readonly fullAllocBytes = 4;
+    override readonly partialAllocBytes = 12;
 
     private health?: number;
+
+    readonly halloweenSkin: boolean;
 
     declare readonly hitbox: CircleHitbox;
 
     private _velocity = Vec.create(0, 0);
+
+    tintIndex = 0;
+    throwerTeamID = 0;
 
     get velocity(): Vector { return this._velocity; }
     set velocity(velocity: Partial<Vector>) {
@@ -83,6 +89,12 @@ export class ThrowableProjectile extends BaseGameObject.derive(ObjectCategory.Th
         this._spawnTime = this.game.now;
         this.hitbox = new CircleHitbox(radius ?? 1, position);
 
+        this.halloweenSkin = this.source.owner.perks.hasPerk(PerkIds.PlumpkinBomb);
+
+        // Colored Teammate C4s
+        this.tintIndex = this.source.owner.colorIndex;
+        if (this.source.owner.teamID) this.throwerTeamID = this.source.owner.teamID;
+
         for (const object of this.game.grid.intersectsHitbox(this.hitbox)) {
             this.handleCollision(object);
         }
@@ -114,6 +126,8 @@ export class ThrowableProjectile extends BaseGameObject.derive(ObjectCategory.Th
         this._activated = true;
         this.setDirty();
         setTimeout(() => {
+            if (this.dead) return;
+
             this.game.removeProjectile(this);
 
             const { explosion } = this.definition.detonation;
@@ -126,7 +140,8 @@ export class ThrowableProjectile extends BaseGameObject.derive(ObjectCategory.Th
                     explosion,
                     referencePosition,
                     this.source.owner,
-                    this.layer
+                    this.layer,
+                    this.source
                 );
             }
         }, delay);
@@ -436,7 +451,7 @@ export class ThrowableProjectile extends BaseGameObject.derive(ObjectCategory.Th
         // nna could be used here, but there's a cleaner way to get rid of undefined with the optional chain below, so lol
         const hitbox = object.hitbox;
 
-        if (!hitbox?.collidesWith(this.hitbox)) return;
+        if (!hitbox?.collidesWith(this.hitbox) || !equalLayer(this.layer, object.layer)) return;
 
         const handleCircle = (hitbox: CircleHitbox): void => {
             const collision = Collision.circleCircleIntersection(this.position, this.hitbox.radius, hitbox.position, hitbox.radius);
@@ -502,7 +517,7 @@ export class ThrowableProjectile extends BaseGameObject.derive(ObjectCategory.Th
         }
     }
 
-    damageC4(amount: number): void {
+    override damage({ amount }: DamageParams): void {
         if (!this.health) return;
 
         this.health = this.health - amount;
@@ -511,15 +526,8 @@ export class ThrowableProjectile extends BaseGameObject.derive(ObjectCategory.Th
             this.source.owner.c4s.splice(this.source.owner.c4s.indexOf(this), 1);
             this.game.removeProjectile(this);
             this.source.owner.dirty.activeC4s = true;
-
-            const { particles } = this.definition.detonation;
-            const referencePosition = Vec.clone(this.position ?? this.source.owner.position);
-            // what?? why are these synced particles?
-            if (particles !== undefined) this.game.addSyncedParticles(particles, referencePosition, this.source.owner.layer);
         }
     }
-
-    override damage(): void { /* can't damage a throwable projectile */ }
 
     get data(): FullData<ObjectCategory.ThrowableProjectile> {
         return {
@@ -528,8 +536,11 @@ export class ThrowableProjectile extends BaseGameObject.derive(ObjectCategory.Th
             layer: this.layer,
             airborne: this._airborne,
             activated: this._activated,
+            throwerTeamID: this.throwerTeamID,
             full: {
-                definition: this.definition
+                definition: this.definition,
+                halloweenSkin: this.halloweenSkin,
+                tintIndex: this.tintIndex
             }
         };
     }

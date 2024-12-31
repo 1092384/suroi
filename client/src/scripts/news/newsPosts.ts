@@ -2,16 +2,159 @@ import { type NewsPost } from "./newsHelper";
 
 export const news: NewsPost[] = [
     {
+        date: 1733881464000,
+        author: "HAZEL",
+        title: "Cold Steel",
+        bannerImage: "../img/news/v0.22.0.png",
+        content: `
+        Winter has arrived on the island, bringing the festive spirit of the season and two new guns with it.
+        <br><br>Normal mode now has a frosty reskin for all assets and new presents that drop weapons, many of which can be found arranged under an outdoor Christmas tree. The <strong>Ice Pick</strong> also makes a return along with a new high-value <strong>Frozen Crate</strong> to use it on, although bullets and certain other melee weapons will work... eventually.
+
+        <br><br>Exclusive to Harvest, the <strong>BLR</strong> is a brand new uncommon <strong>5.56mm DMR</strong> with a 5 round magazine, high damage, and moderate overall stats that rewards careful aim instead of blind spam.
+        <br><br>The <strong>RGS sniper rifle</strong> has replaced the CZ-600 in the Red Tugboat, boasting a <strong>ten round</strong> magazine and overall improved stats from its predecessor while being chambered in the same caliber but unable to be found anywhere else in Classic mode. In Harvest mode, it can also be found in airdrops, River and Viking crates, and the gun lockers.
+        <br><br>The <strong>Lewis Gun</strong> has received a major overhaul, boasting a faster fire rate, decreased movement penalties, and a more fairly sized sprite to make it less of a pain in combat.
+
+        <br><br>Weekly rotating modes will begin on <strong>Sunday, December 15th at 8PM EST</strong>. Mode rotations <strong>will be adjusted in the future as needed and in response to community feedback</strong>.
+        `,
+        longContent: `<h2>Suroi v0.22.0</h2>
+<h3>New features</h3>
+<ul>
+  <li><strong>Winter map!</strong> A reskinned variant of Normal mode with snow covered buildings and obstacles.</li>
+  <li><strong>New structure!</strong> Added the Christmas Camp, exclusive to the winter map.</li>
+  <li><strong>New guns!</strong></li>
+  <ul>
+    <li>BLR: A high-damaging but low capacity DMR chambered in 5.56mm, exclusive to Harvest mode.</li>
+    <li>RGS: A sniper rifle chambered in 5.56mm, featuring a high capacity and fire rate.</li>
+  </ul>
+  <li><strong>New melee!</strong> Added the Ice Pick, exclusive to the winter map.</li>
+  <li>New layout variants for the Warehouse and Blue House vault.</li>
+  <li>Added Light Choco skin, exclusive to airdrops on the winter map.</li>
+</ul>
+
+<h3>Changes</h3>
+<ul>
+  <li>The Lewis Gun has been rebalanced with higher damage (16 -> 16.5), lower fire delay (120 -> 115), and reduced speed penalty (0.65x -> 0.7x) at the cost of a reduced obstacle multiplier (2.5 -> 2).</li>
+  <li>Decreased Vector damage (10 -> 9).</li>
+  <li>Updated the loot images of the Tango 51, CZ-75A, Flues, Mini-14, Mosin-Nagant, Model 37, HP-18, and M16A4.</li>
+  <li>Updated Model 37 world image.</li>
+  <li>The CZ-600 is now more common on the Normal map and has been removed from airdrops.</li>
+  <li>Added cooldown for emotes and team pings, preventing spamming.</li>
+  <li>Removed most of the large trees on the Normal map.</li>
+  <li>Renamed the VSS to VSS Vintorez, and the PP-19 to PP-19 Vityaz.</li>
+  <li>Adjusted birch tree sprite.</li>
+  <li>New sickle swing animation.</li>
+</ul>
+
+<h3>Bug fixes</h3>
+<ul>
+  <li>Fixed issues with ceiling visibility in the armory vault.</li>
+  <li>Fixed incorrectly scaled item request emotes.</li>
+  <li>Fixed the rotations of the two dumpsters in the port.</li>
+  <li>Fixed oversized DEagle world image.</li>
+  <li>Fixed Z index issue with the couches in the headquarters.</li>
+</ul>`
+    },
+    {
+        date: 1731370468000,
+        author: "HAZEL",
+        title: "Empty Baskets",
+        content: `Harvest comes to a close and Classic mode returns to the island, but more is soon to come. We will be holding a <strong>closed beta test for accounts</strong> in the not-so-distant future, so stay tuned to official Suroi channels for information on how to participate.
+
+<br><a href="/rules">The rules</a> have been updated. Please take the time to read them.`
+    },
+    {
+        date: 1730689557000,
+        author: "HAZEL",
+        title: "Autumn Wilt",
+        content: "The spooky season comes to a close, and the Plumpkins have died off. We hoped you enjoyed this year's Halloween mode, and will be taking your feedback into account for future events. Harvest will continue until <strong>November 11th</strong>, but will return in future as a rotating mode."
+    },
+    {
+        date: 1730428409000,
+        author: "HAZEL",
+        title: "Plumpkin Panic",
+        bannerImage: "../img/news/v0.21.0.png",
+        content: `<strong>Happy Halloween!</strong> It's that time of year again, and the Plumpkins have broken out of the bunker, leaving the island covered in brand new perk opportunities. The Harvest map has been changed to fit the festivities, with a delightfully spooky theme.
+
+<br><br>For a limited time, <strong>13 brand new Halloween exclusive perks</strong> will be available to pick up alongside the normal perks. There's no need to choose between one or the other: You can have one of each!
+
+<br><br>Halloween will run for <strong>3 days</strong>, until 8 PM EST, Nov 3rd.`,
+        longContent: `<h2>Suroi v0.21.0</h2>
+<h3>New features</h3>
+<ul>
+<li><strong>Halloween mode!</strong> A variant of Harvest mode with some spooky goodies.</li>
+<li><strong>More perks!</strong> Added 13 Halloween-exclusive perks.</li>
+</ul>
+
+<h3>Changes</h3>
+<ul>
+<li>Buffed Model 89 and DT-11.</li>
+<li>Slight tweaks to SKS sprites.</li>
+<li>Fixed team pings rendering below airdrop parachutes.</li>
+  </ul>`
+    },
+    {
+        date: 1730057509000,
+        author: "HAZEL",
+        title: "Open Season",
+        bannerImage: "../img/news/v0.20.0.png",
+        content: `Fall settles on a brand new mode, <strong>Harvest</strong>, bringing a plethora of <strong>new guns</strong>, a wide assortment of <strong>Perks</strong>, and the mysterious <strong>Plumpkins...</strong>
+
+<br><br>Harvest is a large map filled with new trees, trails, and brand new ambient sounds and particles, as well as a bounty of new structures, including the <strong>Barns</strong>, old farming relics with plenty of cover, and the <strong>Lodge</strong>, a luxurious forest getaway with more than meets the eye...
+
+<br><br>Deep underground, the <strong>Plumpkin Bunker</strong> has been uncovered. This monument of engineering and science contains everything from a fully stocked guard's quarters, to a warehouse, generator room, and the main labs themselves. Rumors have it that the experiments sealed inside the test chambers are highly enigmatic, but <strong>richly rewarding</strong> to anyone fortunate enough to lay hands on them. One of the samples seems to be sealed off... <strong>for now.</strong>
+
+<br><br>Recent documents have revealed the <strong>Bombed Armory</strong>, containing the returning fan-favorite <strong>USAS-12</strong> sealed inside the vault, although getting inside might take a more <strong>brute force</strong> approach this time.
+
+<br><br>Brand new weapon shipments to both Harvest and Normal mode include the <strong>SKS</strong>, a reliable and common DMR chambered in 7.62, although it leaves something to be desired in damage. The <strong>VKS Vykhlop</strong> has that more than covered, firing high damage suppressed .50 cal rounds at a low velocity. Finally, the monstrous <strong>Mk-18 Mjölnir</strong>, chambered in .338 Lapua Magnum, will rip through any competition with an impressive mixture of immense damage and fast fire rate.
+
+<br><br>Unique to Harvest mode are two brand new shotguns, the <strong>DT-11</strong>, an under-over double barrel shotgun with longer range and lower damage compared to its sawed-off counterpart, and the <strong>M590M</strong>, a military pump-action shotgun firing high-explosive slugs.
+
+<br><br>There's much more to check out, including new skins, a variety of small structures, brand new foliage, and changes yet to come.
+        `,
+        longContent: `<h2>Suroi v0.20.0</h2>
+<h3>New features</h3>
+<ul>
+  <li><strong>Harvest mode!</strong> A larger, fall-themed map with terrain features.</li>
+  <li><strong>Perks!</strong> Added 12 perks.</li>
+  <li><strong>New structures!</strong> Added the Plumpkin Bunker, Lodge, Barn, Bombed Armory, Tents, Outhouses, and Hay Sheds.</li>
+  <li><strong>New guns!</strong></li>
+  <ul>
+    <li>SKS: A DMR chambered in 7.62mm.</li>
+    <li>VKS Vykhlop: A suppressed sniper chambered in .50 Cal.</li>
+    <li>Mk-18 Mjölnir: A powerful DMR chambered in .338 Lapua Magnum.</li>
+    <li>DT-11: A double-barrel shotgun. Exclusive to Harvest mode.</li>
+    <li>M590M: A pump-action shotgun which fires high explosive rounds, similar to the USAS-12. Also exclusive to Harvest mode.</li>
+  </ul>
+</ul>
+
+<h3>Changes</h3>
+<ul>
+  <li>Overhaul to matchmaking algorithm. This should reduce late spawning and improve server performance.</li>
+  <ul>
+    <li>Reduced max players per game to 60.</li>
+  </ul>
+  <li>Nerfed grenade boosting.</li>
+  <li>Ammo crates now drop 2-3 pieces of ammo.</li>
+  <li>The Model 89 is now more common in normal mode.</li>
+  <li>Increased M1 Garand damage from 39 to 48.</li>
+  <li>Increased SR-25 damage from 28.5 to 33.</li>
+  <li>New AK-47, M16A4, and Vector sounds.</li>
+  <li>New Flues and G19 fire sounds.</li>
+  <li>Fixed bullets not damaging bushes and tables.</li>
+  <li>Fixed occasional “Error joining game” issues.</li>
+</ul>`
+    },
+    {
         date: 1727030995000,
         author: "HAZEL",
         title: "High-Caliber Negotiations",
         bannerImage: "../img/news/v0.19.0.png",
         content: `
           Good old-fashioned bureaucracy has made its way to the island with this update, alongside an overhaul of the highest tiers of ammo, two new melee weapons, and three new guns with impressive firepower.
-          <br><br>Front and center, the massive <b>AEGIS Headquarters</b> has recently been completed. This titan of industry features two separate floors, a security office with an attached armory, a cafeteria, a boardroom, an executive office and lounge, and plenty of loot to make it worth your while. Rumor has it that the CEO even keeps a personal vault hidden somewhere in the building...
-          <br><br>Two new handguns have been added: the <b>DEagle</b> and the <b>RSh-12</b>, both chambered in <b>.50 Cal</b>. The DEagle offers solid damage, high DPS, and a fair magazine size all in a compact package. On the other hand, the RSh-12 brings the term 'assault revolver' to life with <b>powerful First Shot Accurate rounds</b>, though it has low range and magazine capacity.
-          <br><br>Due to a supply shortage, the Barrett M95 <b>is no longer available</b>. However, fear not; we've found an even more suitable replacement. The <b>L115A1</b>, chambered in <b>the elusive .338 Lapua Magnum</b>, is sure to turn heads (and pop them just as easily). Like its predecessor, the L115A1 is more than capable of engaging any opponent, regardless of armor.
-          <br><br>There's much more to explore, including the <b>Fire Hatchet</b> and <b>Falchion</b> melees, overhauled Cargo Ship and Oil Tanker, brand new <b>Blue House</b>, and a few surprises coming in the near future.
+          <br><br>Front and center, the massive <strong>AEGIS Headquarters</strong> has recently been completed. This titan of industry features two separate floors, a security office with an attached armory, a cafeteria, a boardroom, an executive office and lounge, and plenty of loot to make it worth your while. Rumor has it that the CEO even keeps a personal vault hidden somewhere in the building...
+          <br><br>Two new handguns have been added: the <strong>DEagle</strong> and the <strong>RSh-12</strong>, both chambered in <strong>.50 Cal</strong>. The DEagle offers solid damage, high DPS, and a fair magazine size all in a compact package. On the other hand, the RSh-12 brings the term 'assault revolver' to life with <strong>powerful First Shot Accurate rounds</strong>, though it has low range and magazine capacity.
+          <br><br>Due to a supply shortage, the Barrett M95 <strong>is no longer available</strong>. However, fear not; we've found an even more suitable replacement. The <strong>L115A1</strong>, chambered in <strong>the elusive .338 Lapua Magnum</strong>, is sure to turn heads (and pop them just as easily). Like its predecessor, the L115A1 is more than capable of engaging any opponent, regardless of armor.
+          <br><br>There's much more to explore, including the <strong>Fire Hatchet</strong> and <strong>Falchion</strong> melees, overhauled Cargo Ship and Oil Tanker, brand new <strong>Blue House</strong>, and a few surprises coming in the near future.
         `,
         longContent: `<h2>Suroi v0.19.0</h2>
 <h3>New features</h3>

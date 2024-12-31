@@ -1,6 +1,4 @@
 import { createTemplate, ObjectDefinitions, type ObjectDefinition } from "../utils/objectDefinitions";
-import { Ammos } from "./ammos";
-import { HealingItems } from "./healingItems";
 
 export enum EmoteCategory {
     People,
@@ -14,6 +12,7 @@ export enum EmoteCategory {
 export interface EmoteDefinition extends ObjectDefinition {
     readonly category: EmoteCategory
     readonly isTeamEmote?: boolean
+    readonly isWeaponEmote?: boolean
 }
 
 const emote = createTemplate<EmoteDefinition>()((name: string, category: EmoteCategory) => ({
@@ -22,14 +21,7 @@ const emote = createTemplate<EmoteDefinition>()((name: string, category: EmoteCa
     category
 }));
 
-const teamEmote = createTemplate<EmoteDefinition>()((idString: string) => ({
-    idString,
-    name: idString,
-    isTeamEmote: true,
-    category: EmoteCategory.TeamEmote
-}));
-
-export const Emotes = ObjectDefinitions.create<EmoteDefinition>([
+export const Emotes = ObjectDefinitions.create<EmoteDefinition>("Emotes", [
     ...[
         "Happy Face",
         "Sad Face",
@@ -96,7 +88,10 @@ export const Emotes = ObjectDefinitions.create<EmoteDefinition>([
         "Fire",
         "RIP",
         "Leosmug",
-        "Socks"
+        "Socks",
+        "Archimedes",
+        "awhhmahgawd",
+        "Boykisser"
     ].map(name => emote([name, EmoteCategory.Memes])),
     ...[
         "Question Mark",
@@ -117,11 +112,5 @@ export const Emotes = ObjectDefinitions.create<EmoteDefinition>([
         "Egg",
         "Squid",
         "Penguin"
-    ].map(name => emote([name, EmoteCategory.Misc])),
-    ...[
-        ...Ammos.definitions.filter(a => !a.ephemeral),
-        ...HealingItems.definitions
-    ].map(({ idString }) => teamEmote([idString]))
+    ].map(name => emote([name, EmoteCategory.Misc]))
 ]);
-
-export const emoteIdStrings = Emotes.definitions.map(emote => emote.idString);

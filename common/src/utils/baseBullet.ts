@@ -5,7 +5,7 @@ import { type Hitbox } from "./hitbox";
 import { adjacentOrEqualLayer, equivLayer } from "./layer";
 import { Geometry, Numeric } from "./math";
 import { type ReifiableDef } from "./objectDefinitions";
-import { type SuroiBitStream } from "./suroiBitStream";
+import type { SuroiByteStream } from "./suroiByteStream";
 import { Vec, type Vector } from "./vector";
 
 export interface BulletOptions {
@@ -13,6 +13,20 @@ export interface BulletOptions {
     readonly rotation: number
     readonly layer: Layer
     readonly source: ReifiableDef<BulletDefinition>
+    readonly modifiers?: {
+        // all multiplicative
+        readonly damage?: number
+        readonly dtc?: number
+        readonly speed?: number
+        readonly range?: number
+        readonly tracer?: {
+            readonly opacity?: number
+            readonly width?: number
+            readonly length?: number
+        }
+    }
+    readonly saturate?: boolean
+    readonly thin?: boolean
     readonly sourceID: number
     readonly reflectionCount?: number
     readonly variance?: number
@@ -63,6 +77,11 @@ export class BaseBullet {
 
     readonly canHitShooter: boolean;
 
+    readonly modifiers?: BulletOptions["modifiers"];
+
+    readonly saturate: boolean;
+    readonly thin: boolean;
+
     constructor(options: BulletOptions) {
         this.initialPosition = Vec.clone(options.position);
         this._oldPosition = this.position = options.position;
@@ -74,19 +93,30 @@ export class BaseBullet {
 
         this.definition = Bullets.reify(options.source);
 
-        let range = this.definition.range;
+        this.modifiers = options.modifiers === undefined || Object.keys(options.modifiers).length === 0
+            ? undefined
+            : options.modifiers;
+
+        let range = (this.modifiers?.range ?? 1) * this.definition.range;
 
         if (this.definition.allowRangeOverride && options.rangeOverride !== undefined) {
-            range = Numeric.clamp(options.rangeOverride, 0, this.definition.range);
+            range = Numeric.clamp(options.rangeOverride, 0, range);
         }
+
         this.maxDistance = (range * (this.rangeVariance + 1)) / (this.reflectionCount + 1);
         this.maxDistanceSquared = this.maxDistance ** 2;
 
         this.direction = Vec.create(Math.sin(this.rotation), -Math.cos(this.rotation));
 
-        this.velocity = Vec.scale(this.direction, this.definition.speed * (this.rangeVariance + 1));
+        this.velocity = Vec.scale(
+            this.direction,
+            (this.modifiers?.speed ?? 1) * this.definition.speed * (this.rangeVariance + 1)
+        );
 
         this.canHitShooter = this.definition.shrapnel || this.reflectionCount > 0;
+
+        this.saturate = options.saturate ?? false;
+        this.thin = options.thin ?? false;
     }
 
     /**
@@ -115,7 +145,6 @@ export class BaseBullet {
             if (
                 ((isObstacle || isBuilding) && (
                     object.definition.noBulletCollision
-                    || object.definition.noCollisions
                     || !equivLayer(object, this)
                 ))
                 || (isPlayer && !adjacentOrEqualLayer(this.layer, object.layer))
@@ -142,29 +171,119 @@ export class BaseBullet {
         return collisions;
     }
 
-    serialize(stream: SuroiBitStream): void {
+    serialize(stream: SuroiByteStream): void {
         Bullets.writeToStream(stream, this.definition);
         stream.writePosition(this.initialPosition);
-        stream.writeRotation(this.rotation, 16);
+        stream.writeRotation2(this.rotation);
         stream.writeLayer(this.layer);
         stream.writeFloat(this.rangeVariance, 0, 1, 4);
-        stream.writeBits(this.reflectionCount, 2);
-        stream.writeObjectID(this.sourceID);
+        stream.writeUint8(this.reflectionCount);
+        stream.writeObjectId(this.sourceID);
+
+        // don't care about damage
+        // don't care about dtc
+        const {
+            speed,
+            range,
+            tracer: {
+                opacity,
+                width,
+                length
+            } = {}
+        } = this.modifiers ?? {};
+
+        const hasMods = this.modifiers !== undefined;
+        const speedMod = speed !== undefined;
+        const rangeMod = range !== undefined;
+        const traceOpacityMod = opacity !== undefined;
+        const traceWidthMod = width !== undefined;
+        const traceLengthMod = length !== undefined;
+
+        stream.writeBooleanGroup(
+            hasMods,
+            speedMod,
+            rangeMod,
+            traceOpacityMod,
+            traceWidthMod,
+            traceLengthMod,
+            this.saturate,
+            this.thin
+        );
+
+        if (hasMods) {
+            /*
+                some overrides aren't sent for performance, space, and security
+                reasons; if the client doesn't use value X, then don't send it for
+                those three reasons
+            */
+
+            if (speedMod) {
+                stream.writeFloat(speed, 0, 4, 1);
+            }
+
+            if (rangeMod) {
+                stream.writeFloat(range, 0, 4, 1);
+            }
+
+            if (traceOpacityMod) {
+                stream.writeFloat(opacity, 0, 4, 1);
+            }
+
+            if (traceWidthMod) {
+                stream.writeFloat(width, 0, 4, 1);
+            }
+
+            if (traceLengthMod) {
+                stream.writeFloat(length, 0, 4, 1);
+            }
+        }
 
         if (this.definition.allowRangeOverride) {
-            stream.writeFloat(this.maxDistance, 0, this.definition.range, 16);
+            stream.writeFloat(this.maxDistance, 0, this.definition.range * (this.modifiers?.range ?? 1), 2);
         }
     }
 
-    static deserialize(stream: SuroiBitStream): BulletOptions {
+    static deserialize(stream: SuroiByteStream): BulletOptions {
         const source = Bullets.readFromStream(stream);
         const position = stream.readPosition();
-        const rotation = stream.readRotation(16);
+        const rotation = stream.readRotation2();
         const layer = stream.readLayer();
         const variance = stream.readFloat(0, 1, 4);
-        const reflectionCount = stream.readBits(2);
-        const sourceID = stream.readObjectID();
-        const rangeOverride = source.allowRangeOverride ? stream.readFloat(0, source.range, 16) : undefined;
+        const reflectionCount = stream.readUint8();
+        const sourceID = stream.readObjectId();
+
+        const [
+            hasMods,
+            speedMod,
+            rangeMod,
+            traceOpacityMod,
+            traceWidthMod,
+            traceLengthMod,
+            saturate,
+            thin
+        ] = stream.readBooleanGroup();
+
+        const modifiers = hasMods
+            ? {
+                get damage(): number {
+                    console.warn("damage modifier is not sent to the client; accessing it is a mistake");
+                    return 1;
+                },
+                get dtc(): number {
+                    console.warn("dtc modifier is not sent to the client; accessing it is a mistake");
+                    return 1;
+                },
+                speed: speedMod ? stream.readFloat(0, 4, 1) : undefined,
+                range: rangeMod ? stream.readFloat(0, 4, 1) : undefined,
+                tracer: {
+                    opacity: traceOpacityMod ? stream.readFloat(0, 4, 1) : undefined,
+                    width: traceWidthMod ? stream.readFloat(0, 4, 1) : undefined,
+                    length: traceLengthMod ? stream.readFloat(0, 4, 1) : undefined
+                }
+            }
+            : undefined;
+
+        const rangeOverride = source.allowRangeOverride ? stream.readFloat(0, source.range * (modifiers?.range ?? 1), 2) : undefined;
 
         return {
             source,
@@ -174,7 +293,10 @@ export class BaseBullet {
             variance,
             reflectionCount,
             sourceID,
-            rangeOverride
+            rangeOverride,
+            modifiers,
+            saturate,
+            thin
         };
     }
 }

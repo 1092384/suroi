@@ -1,17 +1,16 @@
 import { Layer, TeamSize } from "@common/constants";
 import { type Vector } from "@common/utils/vector";
-
 import { type Maps } from "./data/maps";
 import { type Game } from "./game";
 import { type GamePlugin } from "./pluginManager";
 
-export enum SpawnMode {
+export const enum SpawnMode {
     Normal,
     Radius,
     Fixed,
     Center
 }
-export enum GasMode {
+export const enum GasMode {
     Normal,
     Debug,
     Disabled
@@ -28,7 +27,7 @@ export const Config = {
     maxTeamSize: TeamSize.Solo,
 
     maxPlayersPerGame: 80,
-    maxGames: 4,
+    maxGames: 5,
     gameJoinTime: 60,
 
     gas: { mode: GasMode.Normal },
@@ -38,24 +37,23 @@ export const Config = {
     plugins: [],
 
     roles: {
-        "developr": { password: "developr", isDev: true },
-        "designr": { password: "designr" },
-        "lead_designr": { password: "lead_designr" },
-        "vip_designr": { password: "vip_designr" },
-        "composr": { password: "composr" },
-        "lead_composr": { password: "lead_composr" },
-        "moderatr": { password: "moderatr" },
-        "administratr": { password: "administratr" },
-        "youtubr": { password: "youtubr" },
-        "boostr": { password: "boostr" },
+        developr: { password: "developr", isDev: true },
+        designr: { password: "designr" },
+        lead_designr: { password: "lead_designr" },
+        vip_designr: { password: "vip_designr" },
+        lead_composr: { password: "lead_composr" },
+        composr: { password: "composr" },
+        sound_designr: { password: "sound_designr" },
+        moderatr: { password: "moderatr" },
+        administratr: { password: "administratr" },
+        content_creatr: { password: "content_creatr" },
+        donatr: { password: "donatr" },
 
-        "hasanger": { password: "hasanger", isDev: true },
-        "katie": { password: "katie", isDev: true },
-        "eipi": { password: "eipi", isDev: true },
-        "pap": { password: "pap", isDev: true },
-        "error": { password: "error", isDev: true },
-        "limenade": { password: "limenade", isDev: true },
-        "123op": { password: "123op" }
+        hasanger: { password: "hasanger", isDev: true },
+        pap: { password: "pap", isDev: true },
+        error: { password: "error", isDev: true },
+        limenade: { password: "limenade", isDev: true },
+        solstice: { password: "solstice", isDev: true }
     },
 
     authServer: {
@@ -99,18 +97,18 @@ export interface ConfigType {
      * - `SpawnMode.Center` always spawns the player in the center of the map.
      */
     readonly spawn:
-        | { readonly mode: SpawnMode.Normal }
-        | {
-            readonly mode: SpawnMode.Radius
-            readonly position: Vector
-            readonly radius: number
-        }
-        | {
-            readonly mode: SpawnMode.Fixed
-            readonly position: Vector
-            readonly layer?: Layer
-        }
-        | { readonly mode: SpawnMode.Center }
+    | { readonly mode: SpawnMode.Normal }
+    | {
+        readonly mode: SpawnMode.Radius
+        readonly position: Vector
+        readonly radius: number
+    }
+    | {
+        readonly mode: SpawnMode.Fixed
+        readonly position: Vector
+        readonly layer?: Layer
+    }
+    | { readonly mode: SpawnMode.Center }
 
     /**
      * The maximum number of players allowed to join a team.
@@ -153,13 +151,13 @@ export interface ConfigType {
      * GasMode.Disabled: Gas is disabled.
      */
     readonly gas:
-        | { readonly mode: GasMode.Disabled }
-        | { readonly mode: GasMode.Normal }
-        | {
-            readonly mode: GasMode.Debug
-            readonly overridePosition?: boolean
-            readonly overrideDuration?: number
-        }
+    | { readonly mode: GasMode.Disabled }
+    | { readonly mode: GasMode.Normal }
+    | {
+        readonly mode: GasMode.Debug
+        readonly overridePosition?: boolean
+        readonly overrideDuration?: number
+    }
 
     /**
      * The number of game ticks that occur per second.
@@ -229,7 +227,11 @@ export interface ConfigType {
         /**
          * If specified, the proxycheck.io API will be used to detect and block VPNs and proxies.
          */
-        readonly proxyCheckAPIKey?: string
+        readonly ipChecker?: {
+            readonly key: string
+            readonly baseUrl: string
+            readonly logURL: string
+        }
     }
 
     /**

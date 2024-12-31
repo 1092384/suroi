@@ -1,25 +1,26 @@
 import { FireMode } from "../constants";
 import { ItemType, ObjectDefinitions, type InventoryItemDefinition } from "../utils/objectDefinitions";
 import { Vec, type Vector } from "../utils/vector";
-import { Materials } from "./obstacles";
 
-export interface MeleeDefinition extends InventoryItemDefinition {
+export type MeleeDefinition = InventoryItemDefinition & {
     readonly itemType: ItemType.Melee
 
     readonly damage: number
     readonly obstacleMultiplier: number
     readonly piercingMultiplier?: number // If it does less dmg vs pierceable objects than it would vs a normal one
-    readonly canPierceMaterials?: ReadonlyArray<typeof Materials[number]>
+    readonly stonePiercing?: boolean
+    readonly iceMultiplier?: number
     readonly swingSound: string
+    readonly stopSound?: string
     readonly radius: number
     readonly offset: Vector
     readonly cooldown: number
     readonly maxTargets: number
+    readonly reskins?: string[]
     readonly fists: InventoryItemDefinition["fists"] & {
         readonly animationDuration: number
         readonly randomFist?: boolean
-        readonly useLeft: Vector
-        readonly useRight: Vector
+        readonly noLeftFistMovement?: boolean
     }
     readonly image?: {
         readonly position: Vector
@@ -28,11 +29,21 @@ export interface MeleeDefinition extends InventoryItemDefinition {
         readonly zIndex: number
         readonly angle?: number
         readonly useAngle?: number
+        readonly xConstant?: number
         readonly lootScale?: number
         readonly separateWorldImage?: boolean
+        readonly animated?: boolean
     }
     readonly fireMode: FireMode
-}
+} & ({
+    readonly rotationalAnimation: true
+} | {
+    readonly rotationalAnimation?: false
+    readonly fists: {
+        readonly useLeft: Vector
+        readonly useRight: Vector
+    }
+});
 
 export const DEFAULT_HAND_RIGGING = Object.freeze({
     left: Vec.create(38, -35),
@@ -40,12 +51,14 @@ export const DEFAULT_HAND_RIGGING = Object.freeze({
 }) as InventoryItemDefinition["fists"] & object;
 
 export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
+    "Melees",
     {
         itemType: ItemType.Melee,
         noDrop: false,
         killstreak: false,
         speedMultiplier: 1,
         swingSound: "swing",
+        iceMultiplier: 0.01,
         maxTargets: 1,
         image: {
             zIndex: 1
@@ -58,6 +71,7 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
             name: "Fists",
             damage: 20,
             obstacleMultiplier: 1,
+            iceMultiplier: 0.01,
             radius: 1.5,
             offset: Vec.create(2.5, 0),
             cooldown: 250,
@@ -96,12 +110,37 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
             }
         },
         {
+            idString: "feral_claws",
+            name: "Feral Claws",
+            damage: 20,
+            obstacleMultiplier: 1,
+            radius: 1.75,
+            offset: Vec.create(2.5, 0),
+            cooldown: 150,
+            // noDrop: true,
+            fists: {
+                animationDuration: 100,
+                randomFist: true,
+                left: Vec.create(38, -35),
+                right: Vec.create(38, 35),
+                useLeft: Vec.create(75, -10),
+                useRight: Vec.create(75, 10)
+            },
+            image: {
+                position: Vec.create(42, 20),
+                usePosition: Vec.create(80, -25),
+                angle: 45,
+                useAngle: 65,
+                lootScale: 0.6
+            }
+        },
+        {
             idString: "hatchet",
             name: "Hatchet",
             damage: 45,
+            rotationalAnimation: true,
             obstacleMultiplier: 2,
             piercingMultiplier: 1.5,
-            canPierceMaterials: ["cardboard", "crate", "iron"], // because ammo crate has "cardboard" material
             radius: 2,
             swingSound: "heavy_swing",
             offset: Vec.create(5.4, -0.5),
@@ -109,13 +148,10 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
             fists: {
                 animationDuration: 150,
                 left: Vec.create(40, -25),
-                right: Vec.create(40, 15),
-                useLeft: Vec.create(35, -35),
-                useRight: Vec.create(75, -20)
+                right: Vec.create(40, 15)
             },
             image: {
                 position: Vec.create(42, 20),
-                usePosition: Vec.create(80, -25),
                 angle: 135,
                 useAngle: 65,
                 lootScale: 0.6
@@ -125,9 +161,10 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
             idString: "fire_hatchet",
             name: "Fire Hatchet",
             damage: 50,
+            rotationalAnimation: true,
             obstacleMultiplier: 2,
             piercingMultiplier: 2,
-            canPierceMaterials: ["cardboard", "crate", "iron"],
+            iceMultiplier: 5,
             radius: 2.05,
             swingSound: "heavy_swing",
             offset: Vec.create(5.4, -0.5),
@@ -135,13 +172,10 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
             fists: {
                 animationDuration: 150,
                 left: Vec.create(40, -25),
-                right: Vec.create(40, 15),
-                useLeft: Vec.create(35, -35),
-                useRight: Vec.create(75, -20)
+                right: Vec.create(40, 15)
             },
             image: {
                 position: Vec.create(42, 20),
-                usePosition: Vec.create(80, -25),
                 angle: 135,
                 useAngle: 65,
                 lootScale: 0.7
@@ -154,7 +188,6 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
             damage: 40,
             obstacleMultiplier: 2.2,
             piercingMultiplier: 2,
-            canPierceMaterials: ["cardboard", "crate", "iron"], // ammo crate moment
             radius: 2.58,
             offset: Vec.create(5.9, 1.7),
             cooldown: 560,
@@ -171,7 +204,8 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
                 angle: 190,
                 useAngle: 40,
                 lootScale: 0.65
-            }
+            },
+            reskins: ["winter"]
         },
         {
             idString: "kbar",
@@ -180,6 +214,7 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
             damage: 25,
             obstacleMultiplier: 1.25,
             radius: 2.7,
+            iceMultiplier: 0.1,
             offset: Vec.create(3.1, 0.9),
             cooldown: 225,
             fists: {
@@ -202,47 +237,47 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
             name: "Sickle",
             damage: 33,
             swingSound: "soft_swing",
-            obstacleMultiplier: 1.15,
+            obstacleMultiplier: 1.3,
             radius: 2.7,
             offset: Vec.create(4, 0),
             cooldown: 400,
+            rotationalAnimation: true,
             //  fireMode: FireMode.Auto, - todo
             fists: {
-                animationDuration: 200,
-                left: Vec.create(38, -35),
-                right: Vec.create(45, 35),
-                useLeft: Vec.create(38, -35),
-                useRight: Vec.create(70, 20)
+                animationDuration: 150,
+                left: Vec.create(29, -39),
+                right: Vec.create(44, 35),
+                noLeftFistMovement: true
             },
             image: {
-                position: Vec.create(61, 67),
-                usePosition: Vec.create(99, -5),
-                angle: 120,
-                useAngle: 5,
-                lootScale: 0.85
-            }
+                position: Vec.create(62, 64),
+                angle: 102,
+                useAngle: 42,
+                lootScale: 0.85,
+                xConstant: 85
+            },
+            reskins: ["winter"]
         },
         {
             idString: "maul",
             name: "Maul",
             damage: 54,
+            iceMultiplier: 5,
+            rotationalAnimation: true,
             swingSound: "heavy_swing",
             obstacleMultiplier: 2,
+            stonePiercing: true,
             piercingMultiplier: 1,
-            canPierceMaterials: ["cardboard", "crate", "iron", "stone"],
             radius: 2.7,
             offset: Vec.create(5.4, -0.5),
             cooldown: 450,
             fists: {
                 animationDuration: 150,
                 left: Vec.create(40, -25),
-                right: Vec.create(40, 15),
-                useLeft: Vec.create(35, -35),
-                useRight: Vec.create(75, -20)
+                right: Vec.create(40, 15)
             },
             image: {
                 position: Vec.create(40, 20),
-                usePosition: Vec.create(80, -25),
                 angle: 135,
                 useAngle: 65,
                 lootScale: 0.6
@@ -251,11 +286,12 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
         {
             idString: "steelfang",
             name: "Steelfang",
+            devItem: true,
             damage: 40,
             noDrop: true,
+            stonePiercing: true,
             obstacleMultiplier: 1,
             piercingMultiplier: 1,
-            canPierceMaterials: ["cardboard", "crate", "iron", "stone"],
             radius: 2.7,
             offset: Vec.create(3.1, 0.9),
             cooldown: 200,
@@ -305,11 +341,12 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
         {
             idString: "heap_sword",
             name: "HE-AP sword",
+            devItem: true,
             damage: 75,
             obstacleMultiplier: 2.5,
             piercingMultiplier: 1,
-            canPierceMaterials: Materials,
             killstreak: true,
+            stonePiercing: true,
             radius: 4,
             offset: Vec.create(5, 0),
             cooldown: 300,
@@ -336,19 +373,18 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
             damage: 35,
             obstacleMultiplier: 1.9,
             piercingMultiplier: 1,
+            iceMultiplier: 5,
             radius: 2.8,
             offset: Vec.create(5.4, -0.5),
             cooldown: 420,
+            rotationalAnimation: true,
             fists: {
                 animationDuration: 150,
                 left: Vec.create(40, -30),
-                right: Vec.create(40, 10),
-                useLeft: Vec.create(33, -36),
-                useRight: Vec.create(68, -20)
+                right: Vec.create(40, 10)
             },
             image: {
                 position: Vec.create(47, 25),
-                usePosition: Vec.create(85, -25),
                 angle: 130,
                 useAngle: 65,
                 lootScale: 0.6
@@ -387,22 +423,49 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
             radius: 4.1,
             // maxTargets: Infinity, - TODO: It must hit multiple targets at once, however enabling this causes melee through wall bug to appear
             offset: Vec.create(7.2, 0.5),
-            canPierceMaterials: ["cardboard", "crate", "iron"],
             piercingMultiplier: 0.95,
             cooldown: 450,
+            rotationalAnimation: true,
             fists: {
-                animationDuration: 200,
+                animationDuration: 150,
                 left: Vec.create(38, -35),
-                right: Vec.create(38.5, 41),
-                useLeft: Vec.create(38, -35),
-                useRight: Vec.create(80, 20)
+                right: Vec.create(43.5, 41.5)
             },
             image: {
-                position: Vec.create(40, 102),
-                usePosition: Vec.create(150, 11),
-                angle: 130,
+                position: Vec.create(5, 90),
+                angle: 170,
                 useAngle: 25,
-                lootScale: 0.6
+                lootScale: 0.6,
+                xConstant: 108 // for world image
+            }
+        },
+        {
+            idString: "chainsaw",
+            name: "Chain Saw",
+            devItem: true,
+            damage: 25,
+            fireMode: FireMode.Auto,
+            obstacleMultiplier: 2,
+            piercingMultiplier: 2,
+            radius: 2.7,
+            swingSound: "chainsaw",
+            stopSound: "chainsaw_stop",
+            offset: Vec.create(6.8, 0.5),
+            cooldown: 0,
+            fists: {
+                animationDuration: 0,
+                left: Vec.create(61, 10),
+                right: Vec.create(35, 70),
+                useLeft: Vec.create(57, 10),
+                useRight: Vec.create(31, 70)
+            },
+            image: {
+                position: Vec.create(106, 27),
+                usePosition: Vec.create(106, 27),
+                angle: 10,
+                useAngle: 10,
+                lootScale: 0.5,
+                animated: true
             }
         }
     ]

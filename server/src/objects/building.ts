@@ -2,12 +2,11 @@ import { ObjectCategory } from "@common/constants";
 import { Buildings, type BuildingDefinition } from "@common/definitions/buildings";
 import { type Orientation } from "@common/typings";
 import { type Hitbox } from "@common/utils/hitbox";
+import { Angle } from "@common/utils/math";
 import { type Timeout } from "@common/utils/misc";
 import { type ReifiableDef } from "@common/utils/objectDefinitions";
 import { type FullData } from "@common/utils/objectsSerializations";
 import { type Vector } from "@common/utils/vector";
-
-import { Angle } from "@common/utils/math";
 import { type Game } from "../game";
 import { Logger } from "../utils/misc";
 import { BaseGameObject } from "./gameObject";
@@ -15,7 +14,7 @@ import { type Obstacle } from "./obstacle";
 
 export class Building extends BaseGameObject.derive(ObjectCategory.Building) {
     override readonly fullAllocBytes = 8;
-    override readonly partialAllocBytes = 4;
+    override readonly partialAllocBytes = 6;
 
     readonly definition: BuildingDefinition;
 
@@ -62,8 +61,8 @@ export class Building extends BaseGameObject.derive(ObjectCategory.Building) {
         this.hitbox = this.definition.hitbox?.transform(this.position, 1, orientation);
         this.collidable = this.damageable = !!this.definition.hitbox;
 
-        if (this.definition.scopeHitbox !== undefined) {
-            this.scopeHitbox = this.definition.scopeHitbox.transform(this.position, 1, orientation);
+        if (this.definition.ceilingHitbox !== undefined && this.definition.ceilingScopeEffect) {
+            this.scopeHitbox = this.definition.ceilingHitbox.transform(this.position, 1, orientation);
         }
 
         if (this.definition.puzzle) {
@@ -97,6 +96,17 @@ export class Building extends BaseGameObject.derive(ObjectCategory.Building) {
             this.dead = true;
             this.setPartialDirty();
             this.game.pluginManager.emit("building_did_destroy_ceiling", this);
+            if (this.definition.destroyUponCeilingCollapse && this.scopeHitbox) {
+                for (const object of this.game.grid.intersectsHitbox(this.scopeHitbox)) {
+                    if ((object.isObstacle && this.definition.destroyUponCeilingCollapse.includes(object.definition.idString)) && object.hitbox.collidesWith(this.spawnHitbox)) {
+                        if (object.definition.isWindow) object.collidable = false;
+                        object.damage({
+                            source: this,
+                            amount: object.health
+                        });
+                    }
+                }
+            }
         }
     }
 
@@ -186,7 +196,7 @@ export class Building extends BaseGameObject.derive(ObjectCategory.Building) {
                     if (obstacle.definition.idString === puzzleDef.triggerOnSolve) {
                         if (obstacle.door) obstacle.door.locked = false;
 
-                        if (!puzzleDef.unlockOnly) obstacle.interact();
+                        if (!puzzleDef.unlockOnly) obstacle.interact(undefined);
                         else obstacle.setDirty();
                     }
                 }

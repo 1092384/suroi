@@ -1,16 +1,29 @@
 import { watch } from "chokidar";
 import { Minimatch } from "minimatch";
-import { resolve } from "path";
+import path, { resolve } from "path";
 import { type SpritesheetData } from "pixi.js";
 import { type FSWatcher, type Plugin, type ResolvedConfig } from "vite";
-import { ModeAtlases } from "../../../common/src/definitions/modes";
 import readDirectory from "./utils/readDirectory.js";
 import { type CompilerOptions, createSpritesheets, type MultiResAtlasList } from "./utils/spritesheet.js";
+import { GameConstants } from "../../../common/src/constants";
+import { Mode, Modes } from "../../../common/src/definitions/modes";
+import { mkdir, readFile, stat } from "fs/promises";
+import { existsSync } from "fs";
+
+const PLUGIN_NAME = "vite-spritesheet-plugin";
+
+export const cacheDir = ".spritesheet-cache";
+export type CacheData = {
+    lastModified: number
+    fileMap: Record<string, string>
+    atlasFiles: {
+        low: string[]
+        high: string[]
+    }
+};
 
 const defaultGlob = "**/*.{png,gif,jpg,bmp,tiff,svg}";
 const imagesMatcher = new Minimatch(defaultGlob);
-
-const PLUGIN_NAME = "vite-spritesheet-plugin";
 
 const compilerOpts = {
     outputFormat: "png",
@@ -18,37 +31,75 @@ const compilerOpts = {
     margin: 8,
     removeExtensions: true,
     maximumSize: 4096,
-    name: "",
+    name: "atlas",
     packerOptions: {}
 } satisfies CompilerOptions as CompilerOptions;
 
-const atlasesToBuild: Record<string, string> = {
-    main: "public/img/game"
+const getImageDirs = (modeName: Mode | "shared", imageDirs: string[] = []): string[] => {
+    imageDirs.push(`public/img/game/${modeName}`);
+    return modeName === "shared"
+        ? imageDirs
+        : getImageDirs(Modes[modeName].inheritTexturesFrom ?? "shared", imageDirs);
 };
 
-for (const atlasId of ModeAtlases) {
-    atlasesToBuild[atlasId] = `public/img/modes/${atlasId}`;
-}
-
-const foldersToWatch = Object.values(atlasesToBuild);
+const imageDirs = getImageDirs(GameConstants.modeName).reverse();
 
 async function buildSpritesheets(): Promise<MultiResAtlasList> {
-    const atlases: MultiResAtlasList = {};
+    const fileMap = new Map<string, { lastModified: number, path: string }>();
 
-    const ids = Object.keys(atlasesToBuild);
-    let i = 0;
-    for (const atlasId of ids) {
-        const files: string[] = readDirectory(atlasesToBuild[atlasId]).filter(x => imagesMatcher.match(x));
-
-        console.log(`Building spritesheet '${atlasId}' (${++i} / ${ids.length}, ${files.length} files in '${atlasId}')`);
-
-        atlases[atlasId] = await createSpritesheets(files, {
-            ...compilerOpts,
-            name: atlasId
+    // Maps have unique keys.
+    // Since the filename is used as the key, and mode sprites are added to the map after the common sprites,
+    // this method allows mode sprites to override common sprites with the same filename.
+    for (const imagePath of imageDirs.map(dir => readDirectory(dir).filter(x => imagesMatcher.match(x))).flat()) {
+        const imageFileInfo = await stat(imagePath);
+        const { mtime, ctime } = imageFileInfo;
+        fileMap.set(imagePath.slice(imagePath.lastIndexOf(path.sep)), {
+            path: imagePath,
+            lastModified: Math.max(mtime.getTime(), ctime.getTime())
         });
     }
 
-    return atlases;
+    let isCached = true;
+    if (!existsSync(cacheDir)) {
+        await mkdir(cacheDir);
+        isCached = false;
+    }
+    if (!existsSync(path.join(cacheDir, "data.json"))) isCached = false;
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const cacheData: CacheData = existsSync(path.join(cacheDir, "data.json"))
+        ? JSON.parse(await readFile(path.join(cacheDir, "data.json"), "utf8"))
+        : {
+            lastModified: Date.now(),
+            fileMap: {},
+            atlasFiles: {
+                low: [],
+                high: []
+            }
+        };
+
+    if (Array.from(fileMap.values()).find(f => f.lastModified > cacheData.lastModified)) isCached = false;
+
+    if (Object.entries(cacheData.fileMap).find(([name, path]) => fileMap.get(name)?.path === path)) isCached = false;
+    if (Array.from(fileMap.entries()).find(([name, data]) => data.path === cacheData.fileMap[name])) isCached = false;
+
+    if (isCached) {
+        console.log("Spritesheets are cached! Skipping build.");
+        return {
+            low: await Promise.all(cacheData.atlasFiles.low.map(async file => ({
+                json: JSON.parse(await readFile(path.join(cacheDir, `${file}.json`), "utf8")) as SpritesheetData,
+                image: await readFile(path.join(cacheDir, `${file}.png`))
+            }))),
+            high: await Promise.all(cacheData.atlasFiles.high.map(async file => ({
+                json: JSON.parse(await readFile(path.join(cacheDir, `${file}.json`), "utf8")) as SpritesheetData,
+                image: await readFile(path.join(cacheDir, `${file}.png`))
+            })))
+        };
+    }
+
+    console.log("Building spritesheets...");
+
+    return await createSpritesheets(fileMap, compilerOpts);
 }
 
 const highResVirtualModuleId = "virtual:spritesheets-jsons-high-res";
@@ -68,15 +119,12 @@ export function spritesheet(): Plugin[] {
     let watcher: FSWatcher;
     let config: ResolvedConfig;
 
-    let atlases: MultiResAtlasList = {};
+    let atlases: MultiResAtlasList;
 
     const exportedAtlases: {
-        readonly low: Record<string, readonly SpritesheetData[]>
-        readonly high: Record<string, readonly SpritesheetData[]>
-    } = {
-        low: {},
-        high: {}
-    };
+        low: SpritesheetData[]
+        high: SpritesheetData[]
+    } = { low: [], high: [] };
 
     const load = (id: string): string | undefined => {
         switch (id) {
@@ -94,22 +142,17 @@ export function spritesheet(): Plugin[] {
             async buildStart() {
                 atlases = await buildSpritesheets();
 
-                for (const atlasId in atlases) {
-                    exportedAtlases.high[atlasId] = atlases[atlasId].high.map(sheet => sheet.json);
-                    exportedAtlases.low[atlasId] = atlases[atlasId].low.map(sheet => sheet.json);
-                }
+                exportedAtlases.high = atlases.high.map(sheet => sheet.json);
+                exportedAtlases.low = atlases.low.map(sheet => sheet.json);
             },
             generateBundle() {
-                for (const atlasId in atlases) {
-                    const sheets = atlases[atlasId];
-                    for (const sheet of [...sheets.low, ...sheets.high]) {
-                        this.emitFile({
-                            type: "asset",
-                            fileName: sheet.json.meta.image,
-                            source: sheet.image
-                        });
-                        this.info(`Built spritesheet ${sheet.json.meta.image}`);
-                    }
+                for (const sheet of [...atlases.low, ...atlases.high]) {
+                    this.emitFile({
+                        type: "asset",
+                        fileName: sheet.json.meta.image,
+                        source: sheet.image
+                    });
+                    this.info("Built spritesheets");
                 }
             },
             resolveId,
@@ -135,7 +178,7 @@ export function spritesheet(): Plugin[] {
                     }, 500);
                 }
 
-                watcher = watch(foldersToWatch.map(pattern => resolve(pattern, defaultGlob)), {
+                watcher = watch(imageDirs.map(pattern => resolve(pattern, defaultGlob)), {
                     cwd: config.root,
                     ignoreInitial: true
                 })
@@ -148,20 +191,14 @@ export function spritesheet(): Plugin[] {
                 async function buildSheets(): Promise<void> {
                     atlases = await buildSpritesheets();
 
-                    const { low, high } = exportedAtlases;
-                    for (const atlasId in atlases) {
-                        high[atlasId] = atlases[atlasId].high.map(sheet => sheet.json);
-                        low[atlasId] = atlases[atlasId].low.map(sheet => sheet.json);
-                    }
+                    exportedAtlases.high = atlases.high.map(sheet => sheet.json);
+                    exportedAtlases.low = atlases.low.map(sheet => sheet.json);
 
                     files.clear();
-                    for (const atlasId in atlases) {
-                        const sheets = atlases[atlasId];
-                        for (const sheet of [...sheets.low, ...sheets.high]) {
-                            // consistently assigned in ./spritesheet.ts in function `createSheet` (in function `createSpritesheets`)
-                            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                            files.set(sheet.json.meta.image!, sheet.image);
-                        }
+                    for (const sheet of [...atlases.low, ...atlases.high]) {
+                        // consistently assigned in ./spritesheet.ts in function `createSheet` (in function `createSpritesheets`)
+                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                        files.set(sheet.json.meta.image!, sheet.image);
                     }
                 }
                 await buildSheets();

@@ -35,7 +35,7 @@ export type SyncedParticleDefinition = ObjectDefinition & {
     /**
      * @default {1}
      */
-    readonly alpha: Animated<number> | NumericSpecifier
+    readonly alpha: (Animated<number> & { creatorMult?: number }) | NumericSpecifier
     /**
      * @default {Infinity}
      */
@@ -98,6 +98,7 @@ export interface SyncedParticleSpawnerDefinition {
 }
 
 export const SyncedParticles = ObjectDefinitions.withDefault<SyncedParticleDefinition>()(
+    "SyncedParticles",
     {
         scale: 1,
         alpha: 1,
@@ -171,6 +172,31 @@ export const SyncedParticles = ObjectDefinitions.withDefault<SyncedParticleDefin
                 }
             ),
             smokeLike(
+                ["plumpkin_smoke_grenade_particle"],
+                {
+                    tint: 0x854770,
+                    hitbox: new CircleHitbox(5),
+                    snapScopeTo: "1x_scope"
+                }
+            ),
+            smokeLike(
+                ["shrouded_particle"],
+                {
+                    tint: 0xaaaaaa,
+                    hitbox: new CircleHitbox(5),
+                    snapScopeTo: "1x_scope",
+                    alpha: {
+                        start: 0.5,
+                        end: 0,
+                        creatorMult: 0.15
+                    },
+                    lifetime: {
+                        mean: 2000,
+                        deviation: 200
+                    }
+                }
+            ),
+            smokeLike(
                 ["tear_gas_particle"],
                 {
                     tint: 0xa0e6ff,
@@ -200,41 +226,7 @@ export const SyncedParticles = ObjectDefinitions.withDefault<SyncedParticleDefin
                     },
                     hitbox: new CircleHitbox(5)
                 }
-            ),
-            {
-                idString: "c4",
-                scale: {
-                    start: {
-                        min: 0.5,
-                        max: 1
-                    },
-                    end: {
-                        min: 0.1,
-                        max: 0.7
-                    }
-                },
-                angularVelocity: {
-                    min: -0.001,
-                    max: 0.001
-                },
-                velocity: {
-                    min: {
-                        x: -0.002,
-                        y: -0.002
-                    },
-                    max: {
-                        x: 0.002,
-                        y: 0.002
-                    }
-                },
-                lifetime: {
-                    mean: 500,
-                    deviation: 0
-                },
-                frame: "metal_particle_1",
-                tint: 0x5f5f5f,
-                zIndex: ZIndexes.ObstaclesLayer1
-            }
+            )
         ];
     }
 );

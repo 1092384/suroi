@@ -1,18 +1,21 @@
+import { Layer, ObjectCategory, ZIndexes } from "@common/constants";
+import { BaseBullet, type BulletOptions } from "@common/utils/baseBullet";
+import { RectangleHitbox } from "@common/utils/hitbox";
+import { adjacentOrEqualLayer, getEffectiveZIndex, isVisibleFromLayer } from "@common/utils/layer";
+import { Geometry, Numeric, resolveStairInteraction } from "@common/utils/math";
+import { random, randomFloat, randomRotation } from "@common/utils/random";
+import { Vec } from "@common/utils/vector";
+import { colord } from "colord";
 import { BloomFilter } from "pixi-filters";
 import { Color } from "pixi.js";
-import { Layer, ObjectCategory, ZIndexes } from "../../../../common/src/constants";
-import { BaseBullet, type BulletOptions } from "../../../../common/src/utils/baseBullet";
-import { RectangleHitbox } from "../../../../common/src/utils/hitbox";
-import { getEffectiveZIndex, isVisibleFromLayer } from "../../../../common/src/utils/layer";
-import { Geometry, resolveStairInteraction } from "../../../../common/src/utils/math";
-import { random, randomFloat, randomRotation } from "../../../../common/src/utils/random";
-import { Vec } from "../../../../common/src/utils/vector";
 import { type Game } from "../game";
 import { MODE, PIXI_SCALE } from "../utils/constants";
 import { SuroiSprite, toPixiCoords } from "../utils/pixi";
 import type { Building } from "./building";
 import { type Obstacle } from "./obstacle";
 import { type Player } from "./player";
+
+const white = 0xFFFFFF;
 
 export class Bullet extends BaseBullet {
     readonly game: Game;
@@ -24,6 +27,7 @@ export class Bullet extends BaseBullet {
     private _trailTicks = 0;
 
     private _lastParticleTrail = Date.now();
+    private _playBulletWhiz: boolean;
 
     constructor(game: Game, options: BulletOptions) {
         super(options);
@@ -36,10 +40,14 @@ export class Bullet extends BaseBullet {
             .setRotation(this.rotation - Math.PI / 2)
             .setVPos(toPixiCoords(this.position));
 
-        this.tracerLength = tracerStats.length;
+        const mods = options.modifiers;
+        const tracerMods = mods?.tracer;
+
+        this.tracerLength = tracerStats.length * (tracerMods?.length ?? 1);
         this.maxLength = this._image.width * this.tracerLength;
-        this._image.scale.y = tracerStats.width;
-        this._image.alpha = tracerStats.opacity / (this.reflectionCount + 1);
+        this._image.scale.y = tracerStats.width * (tracerMods?.width ?? 1) * (this.thin ? 0.5 : 1);
+        this._image.alpha = tracerStats.opacity * (tracerMods?.opacity ?? 1) / (this.reflectionCount + 1);
+
         if (this.game.console.getBuiltInCVar("cv_cooler_graphics")) {
             this._image.filters = new BloomFilter({
                 strength: 5
@@ -48,16 +56,22 @@ export class Bullet extends BaseBullet {
 
         if (!tracerStats.particle) this._image.anchor.set(1, 0.5);
 
-        const white = 0xFFFFFF;
         const color = new Color(
             tracerStats.color === -1
                 ? random(0, white)
                 : tracerStats.color ?? white
         );
         if (MODE.bulletTrailAdjust) color.multiply(MODE.bulletTrailAdjust);
+        if (this.saturate) {
+            const hsl = colord(color.toRgbaString()).saturate(50);
+            color.value = (hsl.brightness() < 0.6 ? hsl.lighten(0.1) : hsl.darken(0.2)).rgba;
+        }
 
-        this._image.tint = new Color(color);
+        this._image.tint = color;
         this.setLayer(this.layer);
+
+        // don't play bullet whiz if bullet originated within whiz hitbox
+        this._playBulletWhiz = !this.game.activePlayer?.bulletWhizHitbox.isPointInside(this.initialPosition);
 
         this.game.camera.addObject(this._image);
     }
@@ -84,9 +98,20 @@ export class Bullet extends BaseBullet {
                 (object as Player | Obstacle | Building).hitEffect(point, Math.atan2(normal.y, normal.x));
 
                 this.damagedIDs.add(object.id);
+
                 this.position = point;
+
+                if (object.isObstacle && object.definition.noCollisions) continue;
+
                 this.dead = true;
                 break;
+            }
+        }
+        if (this._playBulletWhiz) {
+            const intersection = this.game.activePlayer?.bulletWhizHitbox.intersectsLine(this.initialPosition, this.position);
+            if (intersection && this.game.layer !== undefined && adjacentOrEqualLayer(this.layer, this.game.layer)) {
+                this.game.soundManager.play(`bullet_whiz_${random(1, 3)}`, { position: intersection.point });
+                this._playBulletWhiz = false;
             }
         }
 
@@ -100,13 +125,13 @@ export class Bullet extends BaseBullet {
 
         if (this.definition.tracer.particle) {
             this._image.scale.set(1 + (traveledDistance / this.maxDistance));
-            this._image.alpha = 2 * this.definition.speed * this._trailTicks / this.maxDistance;
+            this._image.alpha = 2 * this.definition.speed * (this.modifiers?.speed ?? 1) * this._trailTicks / this.maxDistance;
 
             this._trailReachedMaxLength ||= this._image.alpha >= 1;
         } else {
-            const length = Math.min(
-                Math.min(
-                    this.definition.speed * this._trailTicks,
+            const length = Numeric.min(
+                Numeric.min(
+                    this.definition.speed * (this.modifiers?.speed ?? 1) * this._trailTicks,
                     traveledDistance
                 ) * PIXI_SCALE,
                 this.maxLength

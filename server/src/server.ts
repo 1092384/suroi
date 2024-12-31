@@ -1,56 +1,46 @@
+import { GameConstants, TeamSize } from "@common/constants";
+import { Badges } from "@common/definitions/badges";
+import { Skins } from "@common/definitions/skins";
+import { type GetGameResponse } from "@common/typings";
+import { Numeric } from "@common/utils/math";
 import { Cron } from "croner";
 import { existsSync, readFile, readFileSync, writeFile, writeFileSync } from "fs";
 import { URLSearchParams } from "node:url";
 import os from "os";
 import { type WebSocket } from "uWebSockets.js";
 import { isMainThread } from "worker_threads";
-
-import { GameConstants, TeamSize } from "@common/constants";
-import { Badges, Skins } from "@common/definitions";
-import { type GetGameResponse } from "@common/typings";
-import { Numeric } from "@common/utils/math";
-
 import { version } from "../../package.json";
 import { Config } from "./config";
-import { findGame, games, newGame } from "./gameManager";
+import { findGame, games, newGame, WorkerMessages } from "./gameManager";
 import { CustomTeam, CustomTeamPlayer, type CustomTeamPlayerContainer } from "./team";
-import { Logger } from "./utils/misc";
+import IPChecker, { Punishment } from "./utils/apiHelper";
+import { cleanUsername, Logger } from "./utils/misc";
 import { cors, createServer, forbidden, getIP, textDecoder } from "./utils/serverHelpers";
-import { cleanUsername } from "./utils/misc";
-import ProxyCheck from "proxycheck-ts";
-
-export interface Punishment {
-    readonly id: string
-    readonly ip: string
-    readonly reportId: string
-    readonly reason: string
-    readonly reporter: string
-    readonly expires?: number
-    readonly punishmentType: "warn" | "temp" | "perma"
-}
 
 let punishments: Punishment[] = [];
 
-const proxyCheck = Config.protection?.proxyCheckAPIKey
-    ? new ProxyCheck({ api_key: Config.protection.proxyCheckAPIKey })
+const ipCheck = Config.protection?.ipChecker
+    ? new IPChecker(Config.protection.ipChecker.baseUrl, Config.protection.ipChecker.key)
     : undefined;
 
-const isVPN = new Map<string, boolean>(
-    existsSync("isVPN.json")
-        ? Object.entries(JSON.parse(readFileSync("isVPN.json", "utf8")))
-        : undefined
-);
+const isVPN = Config.protection?.ipChecker
+    ? new Map<string, boolean>()
+    : new Map<string, boolean>(
+        existsSync("isVPN.json")
+            ? Object.entries(JSON.parse(readFileSync("isVPN.json", "utf8")) as Record<string, boolean>)
+            : undefined
+    );
 
 async function isVPNCheck(ip: string): Promise<boolean> {
-    if (!proxyCheck) return false;
+    if (!ipCheck) return false;
 
     let ipIsVPN = isVPN.get(ip);
     if (ipIsVPN !== undefined) return ipIsVPN;
 
-    const result = await proxyCheck.checkIP(ip, { vpn: 3 }, 5000);
-    if (!result || result.status === "denied" || result.status === "error") return false;
+    const result = await ipCheck.check(ip);
+    if (!result?.flagged) return false;
 
-    ipIsVPN = result[ip].proxy === "yes" || result[ip].vpn === "yes";
+    ipIsVPN = result.flagged;
     isVPN.set(ip, ipIsVPN);
     return ipIsVPN;
 }
@@ -91,7 +81,7 @@ if (isMainThread) {
         res
             .writeHeader("Content-Type", "application/json")
             .end(JSON.stringify({
-                playerCount: games.reduce((a, b) => (a + (b?.data.aliveCount ?? 0)), 0),
+                playerCount: games.reduce((a, b) => (a + (b?.aliveCount ?? 0)), 0),
                 maxTeamSize,
 
                 nextSwitchTime: maxTeamSizeSwitchCron?.nextRun()?.getTime(),
@@ -114,29 +104,27 @@ if (isMainThread) {
                     fetch(
                         `${protection.punishments.url}/punishments/${ip}`,
                         { headers: { "api-key": protection.punishments.password } }
-                    ).catch(e => console.error("Error acknowledging warning. Details: ", e));
+                    ).catch(e => console.error("Error acknowledging warning. Details:", e));
                 }
                 removePunishment(ip);
             }
             response = { success: false, message: punishment.punishmentType, reason: punishment.reason, reportID: punishment.reportId };
-
         } else {
             const teamID = maxTeamSize !== TeamSize.Solo && new URLSearchParams(req.getQuery()).get("teamID"); // must be here or it causes uWS errors
             if (await isVPNCheck(ip)) {
-                response = { success: false, message: "perma", reason: "VPN/proxy detected. To play the game, please disable it." };
-
+                response = { success: false, message: "vpn" };
             } else if (teamID) {
                 const team = customTeams.get(teamID);
                 if (team?.gameID !== undefined) {
-                    response = games[team.gameID]
+                    const game = games[team.gameID];
+                    response = game && !game.stopped
                         ? { success: true, gameID: team.gameID }
                         : { success: false };
                 } else {
                     response = { success: false };
                 }
-
             } else {
-                response = findGame();
+                response = await findGame();
             }
 
             if (response.success) {
@@ -200,15 +188,12 @@ if (isMainThread) {
                 return;
             }
 
-            let isLeader: boolean;
             if (noTeamIdGiven) {
-                isLeader = false;
                 if (team.locked || team.players.length >= (maxTeamSize as number)) {
                     forbidden(res); // TODO "Team is locked" and "Team is full" messages
                     return;
                 }
             } else {
-                isLeader = true;
                 team = new CustomTeam();
                 customTeams.set(team.id, team);
 
@@ -246,8 +231,8 @@ if (isMainThread) {
             }
 
             // Validate skin
-            const roleRequired = Skins.fromStringSafe(skin)?.roleRequired;
-            if (roleRequired && roleRequired !== role) {
+            const rolesRequired = Skins.fromStringSafe(skin)?.rolesRequired;
+            if (rolesRequired && !rolesRequired.includes(role)) {
                 skin = GameConstants.player.defaultSkin;
             }
 
@@ -261,7 +246,6 @@ if (isMainThread) {
                 {
                     player: new CustomTeamPlayer(
                         team,
-                        isLeader,
                         name,
                         skin,
                         badge,
@@ -321,7 +305,7 @@ if (isMainThread) {
         Logger.log(`Listening on ${Config.host}:${Config.port}`);
         Logger.log("Press Ctrl+C to exit.");
 
-        newGame(0);
+        void newGame(0);
 
         setInterval(() => {
             const memoryUsage = process.memoryUsage().rss;
@@ -341,6 +325,10 @@ if (isMainThread) {
         if (typeof teamSize === "object") {
             maxTeamSizeSwitchCron = Cron(teamSize.switchSchedule, () => {
                 maxTeamSize = teamSize.rotation[teamSizeRotationIndex = (teamSizeRotationIndex + 1) % teamSize.rotation.length];
+
+                for (const game of games) {
+                    game?.worker.postMessage({ type: WorkerMessages.UpdateMaxTeamSize, maxTeamSize });
+                }
 
                 const humanReadableTeamSizes = [undefined, "solos", "duos", "trios", "squads"];
                 Logger.log(`Switching to ${humanReadableTeamSizes[maxTeamSize] ?? `team size ${maxTeamSize}`}`);
@@ -394,7 +382,7 @@ if (isMainThread) {
 
                 teamsCreated = {};
 
-                if (protection.proxyCheckAPIKey) {
+                if (!Config.protection?.ipChecker) {
                     writeFileSync("isVPN.json", JSON.stringify(Object.fromEntries(isVPN)));
                 }
 

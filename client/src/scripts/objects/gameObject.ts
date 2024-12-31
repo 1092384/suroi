@@ -1,15 +1,15 @@
+import { Layer, type ObjectCategory } from "@common/constants";
+import { makeGameObjectTemplate } from "@common/utils/gameObject";
+import { Angle, Numeric } from "@common/utils/math";
+import { type Timeout } from "@common/utils/misc";
+import { type ObjectsNetData } from "@common/utils/objectsSerializations";
+import { FloorTypes } from "@common/utils/terrain";
+import { Vec, type Vector } from "@common/utils/vector";
 import { Container, Graphics } from "pixi.js";
-import { Layer, type ObjectCategory } from "../../../../common/src/constants";
-import { Angle, Numeric } from "../../../../common/src/utils/math";
-import { type Timeout } from "../../../../common/src/utils/misc";
-import { type ObjectsNetData } from "../../../../common/src/utils/objectsSerializations";
-import { Vec, type Vector } from "../../../../common/src/utils/vector";
 import { type Game } from "../game";
 import { type GameSound, type SoundOptions } from "../managers/soundManager";
 import { HITBOX_DEBUG_MODE } from "../utils/constants";
 import { toPixiCoords } from "../utils/pixi";
-import { makeGameObjectTemplate } from "../../../../common/src/utils/gameObject";
-import { FloorTypes } from "../../../../common/src/utils/terrain";
 
 export abstract class GameObject<Cat extends ObjectCategory = ObjectCategory> extends makeGameObjectTemplate() {
     id: number;
@@ -49,7 +49,7 @@ export abstract class GameObject<Cat extends ObjectCategory = ObjectCategory> ex
             Vec.lerp(
                 this._oldPosition,
                 this.position,
-                Math.min(
+                Numeric.min(
                     (Date.now() - this._lastPositionChange) / this.game.serverDt,
                     1
                 )
@@ -81,7 +81,10 @@ export abstract class GameObject<Cat extends ObjectCategory = ObjectCategory> ex
         this.container.rotation = Numeric.lerp(
             this._oldRotation,
             this._oldRotation + Angle.minimize(this._oldRotation, this._rotation),
-            Math.min(((Date.now() - this._lastRotationChange) / this.game.serverDt), 1)
+            Numeric.min(
+                (Date.now() - this._lastRotationChange) / this.game.serverDt,
+                1
+            )
         );
     }
 

@@ -1,28 +1,31 @@
+import { DEFAULT_INVENTORY, GameConstants, KillfeedEventSeverity, KillfeedEventType, KillfeedMessageType } from "@common/constants";
+import { Ammos } from "@common/definitions/ammos";
+import { type BadgeDefinition } from "@common/definitions/badges";
+import { type EmoteDefinition } from "@common/definitions/emotes";
+import { type GunDefinition } from "@common/definitions/guns";
+import { Loots } from "@common/definitions/loots";
+import { MapPings, type PlayerPing } from "@common/definitions/mapPings";
+import { PerkCategories, PerkIds, type PerkDefinition } from "@common/definitions/perks";
+import { DEFAULT_SCOPE, type ScopeDefinition } from "@common/definitions/scopes";
+import { Skins } from "@common/definitions/skins";
+import { type GameOverData } from "@common/packets/gameOverPacket";
+import { type KillFeedPacketData } from "@common/packets/killFeedPacket";
+import { type PlayerData } from "@common/packets/updatePacket";
+import { Numeric } from "@common/utils/math";
+import { ExtendedMap, freezeDeep } from "@common/utils/misc";
+import { ItemType, type ReferenceTo } from "@common/utils/objectDefinitions";
+import { Vec, type Vector } from "@common/utils/vector";
 import $ from "jquery";
 import { Color } from "pixi.js";
-import { DEFAULT_INVENTORY, GameConstants, KillfeedEventSeverity, KillfeedEventType, KillfeedMessageType } from "../../../../common/src/constants";
-import { Ammos } from "../../../../common/src/definitions/ammos";
-import { type BadgeDefinition } from "../../../../common/src/definitions/badges";
-import { emoteIdStrings, type EmoteDefinition } from "../../../../common/src/definitions/emotes";
-import { type GunDefinition } from "../../../../common/src/definitions/guns";
-import { Loots } from "../../../../common/src/definitions/loots";
-import { MapPings, type PlayerPing } from "../../../../common/src/definitions/mapPings";
-import { DEFAULT_SCOPE, type ScopeDefinition } from "../../../../common/src/definitions/scopes";
-import { type GameOverData } from "../../../../common/src/packets/gameOverPacket";
-import { type KillFeedPacketData } from "../../../../common/src/packets/killFeedPacket";
-import { type PlayerData } from "../../../../common/src/packets/updatePacket";
-import { Numeric } from "../../../../common/src/utils/math";
-import { ExtendedMap, freezeDeep } from "../../../../common/src/utils/misc";
-import { ItemType, type ReferenceTo } from "../../../../common/src/utils/objectDefinitions";
-import { Vec, type Vector } from "../../../../common/src/utils/vector";
 import { getTranslatedString, NO_SPACE_LANGUAGES } from "../../translations";
+import { type TranslationKeys } from "../../typings/translations";
 import { type Game } from "../game";
 import { type GameObject } from "../objects/gameObject";
 import { Player } from "../objects/player";
-import { GHILLIE_TINT, TEAMMATE_COLORS, UI_DEBUG_MODE } from "../utils/constants";
+import { GHILLIE_TINT, MODE, TEAMMATE_COLORS, UI_DEBUG_MODE } from "../utils/constants";
 import { formatDate, html } from "../utils/misc";
 import { SuroiSprite } from "../utils/pixi";
-import { Skins } from "../../../../common/src/definitions";
+import { ClientPerkManager } from "./perkManager";
 
 function safeRound(value: number): number {
     if (0 < value && value <= 1) return 1;
@@ -58,6 +61,8 @@ export class UIManager {
 
     teammates: PlayerData["teammates"] & object = [];
 
+    readonly perks: ClientPerkManager;
+
     readonly debugReadouts = Object.freeze({
         fps: $<HTMLSpanElement>("#fps-counter"),
         ping: $<HTMLSpanElement>("#ping-counter"),
@@ -72,6 +77,8 @@ export class UIManager {
             throw new Error("Class 'UIManager' has already been instantiated");
         }
         UIManager._instantiated = true;
+
+        this.perks = new ClientPerkManager(this.game);
     }
 
     getRawPlayerNameNullish(id: number): string | undefined {
@@ -93,7 +100,8 @@ export class UIManager {
         return this.getRawPlayerNameNullish(id) ?? "[Unknown Player]";
     }
 
-    getPlayerName(id: number): string {
+    getPlayerData(id: number): { name: string, badge: BadgeDefinition | undefined } {
+        // Name
         const element = $<HTMLSpanElement>("<span>");
         const player = this.game.playerNames.get(id) ?? this._teammateDataCache.get(id);
 
@@ -106,27 +114,23 @@ export class UIManager {
         element.text(name);
 
         // what in the jquery is this
-        return element.prop("outerHTML") as string;
-    }
+        const playerName = element.prop("outerHTML") as string;
 
-    getPlayerBadge(id: number): BadgeDefinition | undefined {
-        if (this.game.console.getBuiltInCVar("cv_anonymize_player_names")) {
-            return;
-        }
+        // Badge
+        let playerBadge: BadgeDefinition | undefined = undefined;
 
-        const player = this.game.playerNames.get(id) ?? this._teammateDataCache.get(id);
-
-        switch (true) {
-            case this.game.console.getBuiltInCVar("cv_anonymize_player_names"): {
-                return;
-            }
-            case player === undefined: {
-                console.warn(`Unknown player name with id ${id}`); return;
-            }
-            default: {
-                return player.badge;
+        if (!this.game.console.getBuiltInCVar("cv_anonymize_player_names")) {
+            if (player !== undefined) {
+                playerBadge = player.badge;
+            } else {
+                console.warn(`Unknown player name with id ${id}`);
             }
         }
+
+        return {
+            name: playerName,
+            badge: playerBadge
+        };
     }
 
     static getHealthColor(normalizedHealth: number, downed?: boolean): string {
@@ -143,8 +147,18 @@ export class UIManager {
         }
     }
 
+    getTeammateColorIndex(id: number): number | undefined {
+        const teammate = this.game.uiManager.teammates.find(teammate => {
+            return teammate.id === id;
+        });
+
+        const colorIndex = teammate ? teammate.colorIndex : (this.game.teamMode ? undefined : 0);
+        return colorIndex;
+    }
+
     readonly ui = Object.freeze({
         loadingText: $<HTMLDivElement>("#loading-text"),
+        // cancelFindingGame: $<HTMLButtonElement>("#btn-cancel-finding-game"),
 
         ammoCounterContainer: $<HTMLDivElement>("#weapon-ammo-container"),
         activeAmmo: $<HTMLSpanElement>("#weapon-clip-ammo-count"),
@@ -263,7 +277,7 @@ export class UIManager {
         closeCreateTeam: $<HTMLButtonElement>("#close-create-team"),
 
         c4Button: $<HTMLButtonElement>("#c4-detonate-btn"),
-        detonateKey: $<HTMLButtonElement>("#detonate-key"),
+        detonateKey: $<HTMLDivElement>("#detonate-key"),
 
         inventoryMsg: $<HTMLSpanElement>("#inventory-message")
     });
@@ -290,7 +304,7 @@ export class UIManager {
             slot,
             () => {
                 const container = $<HTMLDivElement>(`#weapon-slot-${slot}`);
-                const inner = container.children(".main-container");
+                const inner = container.children<HTMLDivElement>(".main-container");
 
                 return {
                     container,
@@ -399,10 +413,10 @@ export class UIManager {
 
         chickenDinner.toggle(packet.won);
 
-        const playerName = this.getPlayerName(packet.playerID);
-        const playerBadge = this.getPlayerBadge(packet.playerID);
+        const playerName = this.getPlayerData(packet.playerID).name;
+        const playerBadge = this.getPlayerData(packet.playerID).badge;
         const playerBadgeText = playerBadge
-            ? html`<img class="badge-icon" src="./img/game/${emoteIdStrings.includes(playerBadge.idString) ? "emotes" : "badges"}/${playerBadge.idString}.svg" alt="${playerBadge.name} badge">`
+            ? html`<img class="badge-icon" src="./img/game/shared/badges/${playerBadge.idString}.svg" alt="${playerBadge.name} badge">`
             : "";
 
         gameOverText.html(
@@ -410,7 +424,7 @@ export class UIManager {
                 ? getTranslatedString("msg_win")
                 : (this.game.spectating
                     ? getTranslatedString("msg_player_died", {
-                        player: this.getPlayerName(packet.playerID)
+                        player: playerName
                     })
                     : getTranslatedString("msg_you_died"))
         );
@@ -454,7 +468,7 @@ export class UIManager {
 
             this.ui.emoteSelectors[i].css(
                 "background-image",
-                definition ? `url("./img/game/${pingWheelActive ? "mapPings" : "emotes"}/${definition.idString}.svg")` : ""
+                definition ? `url("./img/game/shared/${pingWheelActive ? "mapPings" : "emotes"}/${definition.idString}.svg")` : ""
             );
         }
     }
@@ -481,7 +495,8 @@ export class UIManager {
             inventory,
             lockedSlots,
             items,
-            activeC4s
+            activeC4s,
+            perks
         } = data;
 
         if (id !== undefined) this.game.activePlayerID = id.id;
@@ -491,11 +506,12 @@ export class UIManager {
             this.game.spectating = spectating;
 
             if (spectating) {
-                const badge = this.getPlayerBadge(id.id);
-                const badgeText = badge ? html`<img class="badge-icon" src="./img/game/${emoteIdStrings.includes(badge.idString) ? "emotes" : "badges"}/${badge.idString}.svg" alt="${badge.name} badge">` : "";
+                const playerName = this.getPlayerData(id.id).name;
+                const badge = this.getPlayerData(id.id).badge;
+                const badgeText = badge ? html`<img class="badge-icon" src="./img/game/shared/badges/${badge.idString}.svg" alt="${badge.name} badge">` : "";
 
                 this.ui.gameOverOverlay.fadeOut();
-                this.ui.spectatingMsgPlayer.html(this.getPlayerName(id.id) + badgeText);
+                this.ui.spectatingMsgPlayer.html(playerName + badgeText);
             }
             this.ui.spectatingContainer.toggle(spectating && this.ui.spectatingOptions.hasClass("fa-eye-slash"));
             this.ui.spectatingMsg.toggle(spectating);
@@ -505,6 +521,27 @@ export class UIManager {
                 this.ui.emoteButton.toggle(!spectating);
                 this.ui.pingToggle.toggle(!spectating);
                 this.ui.menuButton.toggle(!spectating);
+            }
+        }
+
+        if (minMax) {
+            this.maxHealth = minMax.maxHealth;
+            this.minAdrenaline = minMax.minAdrenaline;
+            this.maxAdrenaline = minMax.maxAdrenaline;
+
+            if (this.maxHealth === GameConstants.player.defaultHealth) {
+                this.ui.maxHealth.text("").hide();
+            } else {
+                this.ui.maxHealth.text(safeRound(this.maxHealth)).show();
+            }
+
+            if (
+                this.maxAdrenaline === GameConstants.player.maxAdrenaline
+                && this.minAdrenaline === 0
+            ) {
+                this.ui.minMaxAdren.text("").hide();
+            } else {
+                this.ui.minMaxAdren.text(`${this.minAdrenaline === 0 ? "" : `${safeRound(this.minAdrenaline)}/`}${safeRound(this.maxAdrenaline)}`).show();
             }
         }
 
@@ -597,27 +634,6 @@ export class UIManager {
 
         if (zoom) this.game.camera.zoom = zoom;
 
-        if (minMax) {
-            this.maxHealth = minMax.maxHealth;
-            this.minAdrenaline = minMax.minAdrenaline;
-            this.maxAdrenaline = minMax.maxAdrenaline;
-
-            if (this.maxHealth === GameConstants.player.defaultHealth) {
-                this.ui.maxHealth.text("").hide();
-            } else {
-                this.ui.maxHealth.text(safeRound(this.maxHealth)).show();
-            }
-
-            if (
-                this.maxAdrenaline === GameConstants.player.maxAdrenaline
-                && this.minAdrenaline === 0
-            ) {
-                this.ui.minMaxAdren.text("").hide();
-            } else {
-                this.ui.minMaxAdren.text(`${this.minAdrenaline === 0 ? "" : `${safeRound(this.minAdrenaline)}/`}${safeRound(this.maxAdrenaline)}`).show();
-            }
-        }
-
         if (adrenaline !== undefined) {
             this.adrenaline = Numeric.remap(adrenaline, 0, 1, this.minAdrenaline, this.maxAdrenaline);
             const percent = 100 * this.adrenaline / this.maxAdrenaline;
@@ -653,6 +669,49 @@ export class UIManager {
             this.ui.c4Button.toggle(activeC4s);
             this.hasC4s = activeC4s;
         }
+
+        /* if (perks) {
+            const oldPerks = this.perks.asList();
+            this.perks.overwrite(perks);
+            const newPerks = this.perks.asList();
+
+            const length = Math.max(oldPerks.length, newPerks.length);
+
+            if (length === 0) {
+                this.resetPerkSlots();
+            }
+
+            for (let i = 0; i < length; i++) {
+                const perk = newPerks[i];
+
+                if (!oldPerks[i] && perk) {
+                    this.updatePerkSlot(perk, i);
+                }
+            }
+        } */
+        if (perks) {
+            const old = this.perks.asList();
+            const oldLength = old.length;
+            this.perks.overwrite(perks);
+
+            const perkList = this.perks.asList();
+            const length = perkList.length;
+
+            if (length === 0) this.resetPerkSlots();
+
+            const iterCount = Numeric.max(oldLength, length);
+            for (let i = 0; i < iterCount; i++) {
+                const perk = perkList[i];
+                if (perk === undefined) {
+                    this.resetPerkSlot(i);
+                    continue;
+                }
+
+                if (old[i] !== perk) {
+                    this.updatePerkSlot(perk, i);
+                }
+            }
+        }
     }
 
     skinID?: string;
@@ -675,7 +734,9 @@ export class UIManager {
             let showReserve = false;
             if (activeWeapon.definition.itemType === ItemType.Gun) {
                 const ammoType = activeWeapon.definition.ammoType;
-                let totalAmmo: number | string = this.inventory.items[ammoType];
+                let totalAmmo: number | string = this.perks.hasPerk(PerkIds.InfiniteAmmo)
+                    ? "∞"
+                    : this.inventory.items[ammoType];
 
                 for (const ammo of Ammos) {
                     if (ammo.idString === ammoType && ammo.ephemeral) {
@@ -727,7 +788,7 @@ export class UIManager {
       TODO proper caching would require keeping a copy of the inventory currently being shown,
            so that we can compare it to what it should now be showing (in other words, a kind
            of "oldInventory—newInventory" thing).
-  */
+    */
     updateWeaponSlots(): void {
         const inventory = this.inventory;
 
@@ -778,13 +839,25 @@ export class UIManager {
                         "color": ""
                     });
 
-                itemName.text(weapon.definition.idString.startsWith("dual_")
-                    ? getTranslatedString("dual_template", { gun: getTranslatedString(weapon.definition.idString.slice("dual_".length)) })
-                    : getTranslatedString(weapon.definition.idString));
+                itemName.text(
+                    definition.itemType === ItemType.Gun && definition.isDual
+                        ? getTranslatedString(
+                            "dual_template",
+                            { gun: getTranslatedString(definition.singleVariant as TranslationKeys) }
+                        )
+                        : getTranslatedString(definition.idString as TranslationKeys)
+                );
 
-                const isFists = weapon.definition.idString === "fists";
+                const isFists = definition.idString === "fists";
                 const oldSrc = itemImage.attr("src");
-                const newSrc = `./img/game/weapons/${weapon.definition.idString}.svg`;
+
+                let frame = definition.idString;
+                if (this.perks.hasPerk(PerkIds.PlumpkinBomb) && definition.itemType === ItemType.Throwable && !definition.noSkin) {
+                    frame += "_halloween";
+                }
+
+                const location = definition.itemType === ItemType.Melee && definition.reskins?.includes(MODE.idString) ? MODE.idString : "shared";
+                const newSrc = `./img/game/${location}/weapons/${frame}.svg`;
                 if (oldSrc !== newSrc) {
                     this._playSlotAnimation(container);
                     itemImage.attr("src", newSrc);
@@ -794,7 +867,7 @@ export class UIManager {
                     = isFists
                         ? this.skinID !== undefined && Skins.fromStringSafe(this.skinID)?.grassTint
                             ? `url("data:image/svg+xml,${encodeURIComponent(`<svg width="34" height="34" viewBox="0 0 8.996 8.996" xmlns="http://www.w3.org/2000/svg"><circle fill="${GHILLIE_TINT.toHex()}" stroke="${new Color(GHILLIE_TINT).multiply("#111").toHex()}" stroke-width="1.05833" cx="4.498" cy="4.498" r="3.969"/></svg>`)}")`
-                            : `url(./img/game/skins/${this.skinID ?? this.game.console.getBuiltInCVar("cv_loadout_skin")}_fist.svg)`
+                            : `url(./img/game/shared/skins/${this.skinID ?? this.game.console.getBuiltInCVar("cv_loadout_skin")}_fist.svg)`
                         : "none";
 
                 itemImage
@@ -829,6 +902,48 @@ export class UIManager {
         // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         element[0].offsetWidth; // causes browser reflow
         element.toggleClass("active");
+    }
+
+    resetPerkSlot(index: number): void {
+        const container = $(`#perk-slot-${index}`);
+
+        container.children(".item-tooltip").html("");
+        container.children(".item-image").attr("src", "");
+        container.css("visibility", "hidden");
+        container.off("pointerdown");
+    }
+
+    private readonly _perkSlots: Array<JQuery<HTMLDivElement> | undefined> = [];
+    private readonly _animationTimeouts: Array<number | undefined> = [];
+    updatePerkSlot(perkDef: PerkDefinition, index: number): void {
+        if (index > 3) index = 0; // overwrite stuff ig?
+        // no, write a hud that can handle it
+
+        const container = this._perkSlots[index] ??= $<HTMLDivElement>(`#perk-slot-${index}`);
+        container.attr("data-idString", perkDef.idString);
+        container.children(".item-tooltip").html(`<strong>${perkDef.name}</strong><br>${perkDef.description}`);
+        container.children(".item-image").attr("src", `./img/game/${perkDef.category === PerkCategories.Halloween ? "halloween" : "fall"}/perks/${perkDef.idString}.svg`);
+        container.css("visibility", this.perks.hasPerk(perkDef.idString) ? "visible" : "hidden");
+
+        container.css("outline", !perkDef.noDrop ? "" : "none");
+
+        const flashAnimationDuration = 3000; // ms
+
+        clearTimeout(this._animationTimeouts[index]);
+
+        container.css("animation", `perk-${perkDef.type ?? "normal"}-colors 1.5s linear infinite`);
+
+        // if (perkDef.type !== undefined) this.game.soundManager.play(`perk_pickup_${perkDef.type}`);
+
+        this._animationTimeouts[index] = window.setTimeout(() => {
+            container.css("animation", "none");
+        }, flashAnimationDuration);
+    }
+
+    resetPerkSlots(): void {
+        for (let i = 0; i < 3; i++) {
+            this.resetPerkSlot(i);
+        }
     }
 
     updateItems(): void {
@@ -1015,37 +1130,6 @@ export class UIManager {
             };
         });
     }
-    /* Womp Womp
-    private static readonly _killfeedEventDescription = freezeDeep<Record<KillfeedEventType, Record<KillfeedEventSeverity, string>>>({
-        [KillfeedEventType.Suicide]: {
-            [KillfeedEventSeverity.Kill]: "committed suicide",
-            [KillfeedEventSeverity.Down]: "knocked themselves out"
-        },
-        [KillfeedEventType.NormalTwoParty]: {
-            [KillfeedEventSeverity.Kill]: "killed",
-            [KillfeedEventSeverity.Down]: "knocked out"
-        },
-        [KillfeedEventType.BleedOut]: {
-            [KillfeedEventSeverity.Kill]: "bled out",
-            [KillfeedEventSeverity.Down]: "bled out non-lethally" // should be impossible
-        },
-        [KillfeedEventType.FinishedOff]: {
-            [KillfeedEventSeverity.Kill]: "finished off",
-            [KillfeedEventSeverity.Down]: "gently finished off" // should be impossible
-        },
-        [KillfeedEventType.FinallyKilled]: {
-            [KillfeedEventSeverity.Kill]: "finally killed",
-            [KillfeedEventSeverity.Down]: "finally knocked out" // should be impossible
-        },
-        [KillfeedEventType.Gas]: {
-            [KillfeedEventSeverity.Kill]: "died to",
-            [KillfeedEventSeverity.Down]: "was knocked out by"
-        },
-        [KillfeedEventType.Airdrop]: {
-            [KillfeedEventSeverity.Kill]: "was fatally crushed",
-            [KillfeedEventSeverity.Down]: "was knocked out"
-        }
-    }); */
 
     private static readonly _killModalEventDescription = freezeDeep<Record<KillfeedEventType, Record<KillfeedEventSeverity, (victim: string, weaponUsed: string) => string>>>({
         [KillfeedEventType.Suicide]: {
@@ -1118,12 +1202,12 @@ export class UIManager {
 
         const getNameAndBadge = (id?: number): { readonly name: string, readonly badgeText: string } => {
             const hasId = id !== undefined;
-            const badge = hasId ? this.getPlayerBadge(id) : undefined;
+            const badge = hasId ? this.getPlayerData(id).badge : undefined;
 
             return {
-                name: hasId ? this.getPlayerName(id) : "",
+                name: hasId ? this.getPlayerData(id).name : "",
                 badgeText: badge
-                    ? html`<img class="badge-icon" src="./img/game/${emoteIdStrings.includes(badge.idString) ? "emotes" : "badges"}/${badge.idString}.svg" alt="${badge.name} badge">`
+                    ? html`<img class="badge-icon" src="./img/game/shared/badges/${badge.idString}.svg" alt="${badge.name} badge">`
                     : ""
             };
         };
@@ -1170,14 +1254,17 @@ export class UIManager {
 
                         let useSpecialSentence = false;
 
-                        // const description = UIManager._killfeedEventDescription[eventType][severity];
-
                         // Remove spaces if chinese/japanese language.
                         if (NO_SPACE_LANGUAGES.includes(language) && messageText) {
                             messageText = messageText.replaceAll("<span>", "<span style=\"display:contents;\">");
                         }
 
-                        const fullyQualifiedName = weaponPresent ? (getTranslatedString(weaponUsed.idString) === weaponUsed.idString ? weaponUsed.name : getTranslatedString(weaponUsed.idString)) : "";
+                        let weaponName: string | undefined;
+                        const fullyQualifiedName = weaponPresent
+                            ? (weaponName = getTranslatedString(weaponUsed.idString as TranslationKeys)) === weaponUsed.idString
+                                ? weaponUsed.name
+                                : weaponName
+                            : "";
 
                         // special case for turkish
                         if (language === "tr") {
@@ -1234,7 +1321,7 @@ export class UIManager {
                                 break;
                             case KillfeedEventType.Suicide:
                                 // Turkish and Estonian special condition ('i shouldn't appear in these messages)
-                                killMessage = getTranslatedString(`kf_message${language === "tr" || language === "et" ? "_grammar" : ""}`, {
+                                killMessage = getTranslatedString(`kf_message${language === "tr" || language === "et" ? "_grammar" : ""}` as TranslationKeys, {
                                     player: victimText,
                                     finally: "",
                                     event: getTranslatedString(`kf_suicide_${severity === KillfeedEventSeverity.Down ? "down" : "kill"}`, { player: "" }),
@@ -1388,9 +1475,14 @@ export class UIManager {
                         classes.push("kill-feed-item-killer");
 
                         if (attackerId === this.game.activePlayerID) {
+                            let weaponName: string | undefined;
                             const base = {
                                 victimName: victimText,
-                                weaponUsed: weaponPresent ? getTranslatedString(weaponUsed.idString) === weaponUsed.idString ? weaponUsed.name : getTranslatedString(weaponUsed.idString) : "",
+                                weaponUsed: weaponPresent
+                                    ? (weaponName = getTranslatedString(weaponUsed.idString as TranslationKeys)) === weaponUsed.idString
+                                        ? weaponUsed.name
+                                        : weaponName
+                                    : "",
                                 type: eventType
                             };
 
@@ -1719,10 +1811,12 @@ class PlayerHealthUI {
 
             if (this._position.dirty && this._position.value) {
                 if ((indicator = teammateIndicators.get(id)) === undefined) {
+                    const color = TEAMMATE_COLORS[this.game.uiManager.getTeammateColorIndex(id) ?? this._colorIndex.value];
+
                     teammateIndicators.set(
                         id,
                         indicator = new SuroiSprite("player_indicator")
-                            .setTint(TEAMMATE_COLORS[this._colorIndex.value])
+                            .setTint(color)
                     );
                     this.game.map.teammateIndicatorContainer.addChild(indicator);
                 }
@@ -1737,7 +1831,7 @@ class PlayerHealthUI {
 
         if (recalcIndicatorFrame) {
             const frame = `player_indicator${this._normalizedHealth.value === 0 ? "_dead" : this._downed.value ? "_downed" : ""}`;
-            const newSrc = `./img/game/player/${frame}.svg`;
+            const newSrc = `./img/game/shared/player/${frame}.svg`;
             if (this.teammateIndicator.attr("src") !== newSrc) {
                 this.teammateIndicator.attr("src", newSrc);
             }
@@ -1745,7 +1839,7 @@ class PlayerHealthUI {
         }
 
         if (this._colorIndex.dirty) {
-            const color = TEAMMATE_COLORS[this._colorIndex.value];
+            const color = TEAMMATE_COLORS[this.game.uiManager.getTeammateColorIndex(id) ?? this._colorIndex.value];
 
             this.indicatorContainer.css(
                 "background-color",
@@ -1773,7 +1867,7 @@ class PlayerHealthUI {
             const teammate = this.game.playerNames.get(id);
 
             if (teammate?.badge) {
-                const src = `./img/game/${emoteIdStrings.includes(teammate.badge.idString) ? "emotes" : "badges"}/${teammate.badge.idString}.svg`;
+                const src = `./img/game/shared/badges/${teammate.badge.idString}.svg`;
 
                 if (this.badgeImage.attr("src") !== src) {
                     this.badgeImage

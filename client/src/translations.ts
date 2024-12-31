@@ -1,39 +1,22 @@
-import { Badges } from "../../common/src/definitions/badges";
-import { Emotes } from "../../common/src/definitions/emotes";
-import { Loots } from "../../common/src/definitions/loots";
+import { Badges } from "@common/definitions/badges";
+import { Loots } from "@common/definitions/loots";
+import { Numeric } from "@common/utils/math";
+import type { TranslationManifest, TranslationsManifest } from "../../translations/src/processTranslations";
 import { type Game } from "./scripts/game";
 import { defaultClientCVars } from "./scripts/utils/console/defaultClientCVars";
-import { ALBANIAN_TRANSLATIONS } from "./translations/albanian";
-import { CHINESE_SIMPLIFIED_TRANSLATIONS } from "./translations/chinese_simplified";
-import { CZECH_TRANSLATIONS } from "./translations/czech";
-import { ENGLISH_TRANSLATIONS } from "./translations/english";
-import { ESTONIAN_TRANSLATIONS } from "./translations/estonian";
-import { FRENCH_TRANSLATIONS } from "./translations/french";
-import { GERMAN_TRANSLATIONS } from "./translations/german";
-import { GREEK_TRANSLATIONS } from "./translations/greek";
-import { HUNGARIAN_TRANSLATIONS } from "./translations/hungarian";
-import { JAPANESE_TRANSLATIONS } from "./translations/japanese";
-import { LATVIAN_TRANSLATIONS } from "./translations/latvian";
-import { LITHUANIAN_TRANSLATIONS } from "./translations/lithuanian";
-import { RUSSIAN_TRANSLATIONS } from "./translations/russian";
-import { TAMIL_TRANSLATIONS } from "./translations/tamil";
-import { TURKISH_TRANSLATIONS } from "./translations/turkısh";
-import { VIETNAMESE_TRANSLATIONS } from "./translations/vietnamese";
-import { CUTE_ENGWISH_TRANSLATIONS } from "./translations/cute_engwish";
-import { CANTONESE_TRANSLATIONS } from "./translations/cantonese";
-import { CHINESE_TRADITIONAL_TRANSLATIONS } from "./translations/chinese_traditional";
-import { ROMANIAN_TRANSLATIONS } from "./translations/romanian";
-import { DRUNKGLISH_TRANSLATIONS } from "./translations/drunkglish";
+import TRANSLATIONS_MANIFEST from "./translationsManifest.json";
+import { type TranslationKeys } from "./typings/translations";
+import { Emotes } from "@common/definitions/emotes";
 
-export type TranslationMap = Record<
-    string,
-    (string | ((replacements: Record<string, string>) => string))
-> & { readonly name: string, readonly flag: string };
+export type TranslationMap = Partial<Record<TranslationKeys, string>> & TranslationManifest;
 
 let defaultLanguage: string;
-let language: string;
+let selectedLanguage: string;
 
-export const TRANSLATIONS = {
+export const TRANSLATIONS: {
+    get defaultLanguage(): string
+    readonly translations: Record<string, TranslationMap>
+} = {
     get defaultLanguage(): string {
         if (!setup) {
             throw new Error("Translation API not yet setup");
@@ -42,41 +25,18 @@ export const TRANSLATIONS = {
         return defaultLanguage;
     },
     translations: {
-        en: ENGLISH_TRANSLATIONS,
-        gr: GREEK_TRANSLATIONS,
-        tr: TURKISH_TRANSLATIONS,
-        ab: ALBANIAN_TRANSLATIONS,
-        fr: FRENCH_TRANSLATIONS,
-        ru: RUSSIAN_TRANSLATIONS,
-        de: GERMAN_TRANSLATIONS,
-        ro: ROMANIAN_TRANSLATIONS,
-        zh: CHINESE_SIMPLIFIED_TRANSLATIONS,
-        tw: CHINESE_TRADITIONAL_TRANSLATIONS,
-        hk_mo: CANTONESE_TRANSLATIONS,
-        jp: JAPANESE_TRANSLATIONS,
-        vi: VIETNAMESE_TRANSLATIONS,
-        ta: TAMIL_TRANSLATIONS,
-        hu: HUNGARIAN_TRANSLATIONS,
-        et: ESTONIAN_TRANSLATIONS,
-        cz: CZECH_TRANSLATIONS,
-        lv: LATVIAN_TRANSLATIONS,
-        lt: LITHUANIAN_TRANSLATIONS,
         hp18: {
             name: "HP-18",
-            flag: "<img height=\"20\" src=\"./img/killfeed/hp18_killfeed.svg\" />"
-        },
-        qen: CUTE_ENGWISH_TRANSLATIONS,
-        den: DRUNKGLISH_TRANSLATIONS
+            flag: "<img height=\"20\" src=\"./img/game/shared/weapons/hp18.svg\" />",
+            percentage: "HP-18%"
+        }
     }
-} as {
-    get defaultLanguage(): string
-    readonly translations: Record<string, TranslationMap>
 };
 
 export const NO_SPACE_LANGUAGES = ["zh", "tw", "hk_mo", "jp"];
 
 let setup = false;
-export function initTranslation(game: Game): void {
+export async function initTranslation(game: Game): Promise<void> {
     if (setup) {
         console.error("Translation API already setup");
         return;
@@ -88,49 +48,61 @@ export function initTranslation(game: Game): void {
         ? defaultClientCVars.cv_language.value
         : defaultClientCVars.cv_language;
 
-    language = game.console.getBuiltInCVar("cv_language");
+    selectedLanguage = game.console.getBuiltInCVar("cv_language");
+
+    const loadRightNow = (language: string, content: TranslationManifest): boolean => content.mandatory || language === selectedLanguage || language === defaultLanguage;
+
+    for (
+        const [language, content] of await Promise.all(
+            Object.entries(TRANSLATIONS_MANIFEST as TranslationsManifest)
+                .map(
+                    async([language, content]): Promise<[string, TranslationMap]> => [
+                        language,
+                        loadRightNow(language, content)
+                            ? await (await fetch(`/translations/${language}.json`)).json()
+                            : content
+                    ]
+                )
+        )
+    ) {
+        TRANSLATIONS.translations[language] = {
+            ...(TRANSLATIONS_MANIFEST as TranslationsManifest)[language],
+            ...content
+        };
+    }
 
     translateCurrentDOM();
 }
 
-export function getTranslatedString(key: string, replacements?: Record<string, string>): string {
+export function getTranslatedString(key: TranslationKeys, replacements?: Record<string, string>): string {
     if (!setup) {
         console.error("Translation API not yet setup");
         return key;
     }
 
     // Easter egg language
-    if (language === "hp18") return "HP-18";
-
-    if (key.startsWith("emote_")) {
-        return Emotes.reify(key.slice("emote_".length)).name;
-    }
+    if (selectedLanguage === "hp18") return "HP-18";
 
     if (key.startsWith("badge_")) {
-        return Badges.reify(key.slice("badge_".length)).name;
+        key = Badges.reify(key.slice("badge_".length)).idString.replace("bdg_", "badge_") as TranslationKeys;
     }
 
-    let foundTranslation: TranslationMap[string];
+    let foundTranslation: string;
     try {
-        foundTranslation = TRANSLATIONS.translations[language]?.[key]
+        foundTranslation = TRANSLATIONS.translations[selectedLanguage]?.[key]
         ?? TRANSLATIONS.translations[defaultLanguage]?.[key]
         ?? Loots.reify(key).name;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (_) {
-        foundTranslation = "no translation found";
+    } catch {
+        if (key.startsWith("emote_")) {
+            return Emotes.reify(key.slice("emote_".length)).name as TranslationKeys;
+        }
+        if (key.startsWith("badge_")) {
+            return Badges.reify(`bdg_${key.slice("badge_".length)}`).name as TranslationKeys;
+        }
+        return key;
     }
 
-    if (foundTranslation === "no translation found") return key;
-
-    if (foundTranslation instanceof Function) {
-        return foundTranslation(replacements ?? {});
-    }
-
-    if (!replacements) {
-        return foundTranslation;
-    }
-
-    for (const [search, replace] of Object.entries(replacements)) {
+    for (const [search, replace] of Object.entries(replacements ?? {})) {
         foundTranslation = foundTranslation.replaceAll(`<${search}>`, replace);
     }
 
@@ -152,12 +124,20 @@ function adjustFontSize(element: HTMLElement): void {
 
     let fontSize: number;
 
-    switch (language) {
+    switch (selectedLanguage) {
         case "ta": // has very long strings
-            fontSize = Math.max((MIN_FONT_SIZE - 2), Math.min(buttonWidth / textWidth * FONT_WIDTH_PER_CHARACTER, 13));
+            fontSize = Numeric.clamp(
+                buttonWidth / textWidth * FONT_WIDTH_PER_CHARACTER,
+                MIN_FONT_SIZE - 2,
+                13
+            );
             break;
         default:
-            fontSize = Math.max(MIN_FONT_SIZE, Math.min(buttonWidth / textWidth * FONT_WIDTH_PER_CHARACTER, 20));
+            fontSize = Numeric.clamp(
+                buttonWidth / textWidth * FONT_WIDTH_PER_CHARACTER,
+                MIN_FONT_SIZE - 2,
+                20
+            );
             break;
     }
 
@@ -173,7 +153,7 @@ function translateCurrentDOM(): void {
         const requestedTranslation = element.getAttribute("translation");
         if (!requestedTranslation) return;
 
-        const translatedString = getTranslatedString(requestedTranslation);
+        const translatedString = getTranslatedString(requestedTranslation as TranslationKeys); // We pray
 
         element[
             element.getAttribute("use-html") === null
@@ -185,7 +165,7 @@ function translateCurrentDOM(): void {
         if (
             (element.classList.contains("btn") || element.parentElement?.classList.contains("btn") || element.parentElement?.classList.contains("tab"))
             && translatedString.length >= 10
-            && !["en", "hp18"].includes(language) // <- why? (because we do not want text measurements on English or HP-18)
+            && !["en", "hp18"].includes(selectedLanguage) // <- why? (because we do not want text measurements on English or HP-18)
         ) {
             adjustFontSize(element);
         }
@@ -195,7 +175,7 @@ function translateCurrentDOM(): void {
 
     if (printTranslationDebug) {
         console.log("Translated", debugTranslationCounter, "strings");
-        console.log("With language as", language, "and default as", defaultLanguage);
+        console.log("With language as", selectedLanguage, "and default as", defaultLanguage);
 
         const reference = new Set(Object.keys(TRANSLATIONS.translations[TRANSLATIONS.defaultLanguage]));
 

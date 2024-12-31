@@ -1,5 +1,5 @@
+import { Numeric } from "@common/utils/math";
 import { Container } from "pixi.js";
-import { Numeric } from "../../../../common/src/utils/math";
 import { type Game } from "../game";
 
 export class Tween<T> {
@@ -18,6 +18,7 @@ export class Tween<T> {
     readonly ease: (x: number) => number;
 
     yoyo: boolean;
+    infinite: boolean;
 
     readonly onUpdate?: () => void;
     readonly onComplete?: () => void;
@@ -30,6 +31,7 @@ export class Tween<T> {
             duration: number
             ease?: (x: number) => number
             yoyo?: boolean
+            infinite?: boolean
             onUpdate?: () => void
             onComplete?: () => void
         }
@@ -44,6 +46,7 @@ export class Tween<T> {
         this.duration = config.duration;
         this.ease = config.ease ?? (t => t);
         this.yoyo = config.yoyo ?? false;
+        this.infinite = config.infinite ?? false;
         this.onUpdate = config.onUpdate;
         this.onComplete = config.onComplete;
         this._endTime = this.startTime + this.duration;
@@ -69,7 +72,7 @@ export class Tween<T> {
 
         if (now >= this.endTime) {
             if (this.yoyo) {
-                this.yoyo = false;
+                this.yoyo = this.infinite;
                 this.startTime = now;
                 this._endTime = this.startTime + this.duration;
                 [this.startValues, this.endValues] = [this.endValues, this.startValues];

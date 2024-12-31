@@ -1,8 +1,8 @@
-import { ObjectCategory } from "../../../../common/src/constants";
-import { type SyncedParticleDefinition } from "../../../../common/src/definitions/syncedParticles";
-import { getEffectiveZIndex } from "../../../../common/src/utils/layer";
-import { Numeric } from "../../../../common/src/utils/math";
-import { type ObjectsNetData } from "../../../../common/src/utils/objectsSerializations";
+import { ObjectCategory } from "@common/constants";
+import { type SyncedParticleDefinition } from "@common/definitions/syncedParticles";
+import { getEffectiveZIndex } from "@common/utils/layer";
+import { Numeric } from "@common/utils/math";
+import { type ObjectsNetData } from "@common/utils/objectsSerializations";
 import { type Game } from "../game";
 import { DIFF_LAYER_HITBOX_OPACITY, HITBOX_COLORS, HITBOX_DEBUG_MODE } from "../utils/constants";
 import { drawHitbox, SuroiSprite, toPixiCoords } from "../utils/pixi";
@@ -12,6 +12,7 @@ export class SyncedParticle extends GameObject.derive(ObjectCategory.SyncedParti
     readonly image = new SuroiSprite();
 
     private _alpha = 1;
+    private _alphaMult = 1;
 
     private _oldScale?: number;
     private _lastScaleChange?: number;
@@ -41,7 +42,10 @@ export class SyncedParticle extends GameObject.derive(ObjectCategory.SyncedParti
         this.container.scale.set(Numeric.lerp(
             this._oldScale,
             this._scale,
-            Math.min(((Date.now() - this._lastScaleChange) / this.game.serverDt), 1)
+            Numeric.min(
+                (Date.now() - this._lastScaleChange) / this.game.serverDt,
+                1
+            )
         ));
     }
 
@@ -60,6 +64,13 @@ export class SyncedParticle extends GameObject.derive(ObjectCategory.SyncedParti
             this._definition = definition;
             this.layer = data.layer;
 
+            if (
+                full.creatorID === this.game.activePlayerID
+                && typeof definition.alpha === "object"
+                && "creatorMult" in definition.alpha
+                && definition.alpha.creatorMult !== undefined
+            ) this._alphaMult = definition.alpha.creatorMult;
+
             this.image.setFrame(`${definition.frame}${variant !== undefined ? `_${variant}` : ""}`);
             if (definition.tint) this.image.tint = definition.tint;
             this.updateZIndex();
@@ -68,7 +79,7 @@ export class SyncedParticle extends GameObject.derive(ObjectCategory.SyncedParti
         this.position = data.position;
         this.rotation = data.rotation;
         this.scale = data.scale ?? this._scale;
-        this.container.alpha = this._alpha = data.alpha ?? this._alpha;
+        this.container.alpha = (this._alpha = data.alpha ?? this._alpha) * this._alphaMult;
 
         if (!this.game.console.getBuiltInCVar("cv_movement_smoothing") || isNew) {
             this.container.position = toPixiCoords(this.position);

@@ -1,5 +1,5 @@
 import { defaultBulletTemplate } from "../constants";
-import { ObjectDefinitions, type BaseBulletDefinition, type ObjectDefinition, type ReferenceTo } from "../utils/objectDefinitions";
+import { inheritFrom, ObjectDefinitions, type BaseBulletDefinition, type ObjectDefinition, type ReferenceTo } from "../utils/objectDefinitions";
 import { type DecalDefinition } from "./decals";
 
 export interface ExplosionDefinition extends ObjectDefinition {
@@ -26,6 +26,7 @@ export interface ExplosionDefinition extends ObjectDefinition {
 }
 
 export const Explosions = ObjectDefinitions.withDefault<ExplosionDefinition>()(
+    "Explosions",
     { ballistics: defaultBulletTemplate },
     () => [
         {
@@ -77,6 +78,33 @@ export const Explosions = ObjectDefinitions.withDefault<ExplosionDefinition>()(
                 damage: 10,
                 obstacleMultiplier: 1,
                 speed: 0.08,
+                range: 20,
+                rangeVariance: 1,
+                shrapnel: true
+            }
+        },
+        {
+            name: "Fireplace",
+            damage: 180,
+            obstacleMultiplier: 2,
+            radius: {
+                min: 10,
+                max: 30
+            },
+            cameraShake: {
+                duration: 300,
+                intensity: 75
+            },
+            animation: {
+                duration: 1000,
+                tint: 0xff5500,
+                scale: 2
+            },
+            shrapnelCount: 20,
+            ballistics: {
+                damage: 5,
+                obstacleMultiplier: 5,
+                speed: 0.1,
                 range: 20,
                 rangeVariance: 1,
                 shrapnel: true
@@ -191,10 +219,38 @@ export const Explosions = ObjectDefinitions.withDefault<ExplosionDefinition>()(
             }
         },
         {
+            idString: "propane_tank_explosion",
+            name: "Propane Tank",
+            damage: 80,
+            obstacleMultiplier: 1,
+            radius: {
+                min: 5,
+                max: 15
+            },
+            cameraShake: {
+                duration: 250,
+                intensity: 20
+            },
+            animation: {
+                duration: 1000,
+                tint: 0xb08b3f,
+                scale: 1.5
+            },
+            shrapnelCount: 8,
+            ballistics: {
+                damage: 2,
+                obstacleMultiplier: 1,
+                speed: 0.08,
+                range: 20,
+                rangeVariance: 1,
+                shrapnel: true
+            }
+        },
+        {
             idString: "usas_explosion",
             name: "USAS-12",
-            damage: 35,
-            obstacleMultiplier: 1,
+            damage: 40,
+            obstacleMultiplier: 1.5,
             radius: {
                 min: 6,
                 max: 16
@@ -210,14 +266,44 @@ export const Explosions = ObjectDefinitions.withDefault<ExplosionDefinition>()(
             },
             shrapnelCount: 13,
             ballistics: {
-                damage: 3,
+                damage: 2,
                 obstacleMultiplier: 1.5,
                 speed: 0.06,
                 range: 10,
                 rangeVariance: 1,
                 shrapnel: true
             },
-            sound: "usas_explosion",
+            sound: "12g_frag_explosion",
+            decal: "explosion_decal"
+        },
+        {
+            idString: "m590m_explosion",
+            name: "M590M",
+            damage: 40,
+            obstacleMultiplier: 1.5,
+            radius: {
+                min: 6,
+                max: 16
+            },
+            cameraShake: {
+                duration: 100,
+                intensity: 10
+            },
+            animation: {
+                duration: 1500,
+                tint: 0x6c1313,
+                scale: 0.8
+            },
+            shrapnelCount: 13,
+            ballistics: {
+                damage: 2,
+                obstacleMultiplier: 1.5,
+                speed: 0.06,
+                range: 10,
+                rangeVariance: 1,
+                shrapnel: true
+            },
+            sound: "12g_frag_explosion",
             decal: "explosion_decal"
         },
         {
@@ -283,6 +369,17 @@ export const Explosions = ObjectDefinitions.withDefault<ExplosionDefinition>()(
             },
             sound: "firework_rocket_explode",
             decal: "explosion_decal"
+        },
+        {
+            [inheritFrom]: "confetti_grenade_explosion",
+            name: "Coal",
+            ballistics: {
+                range: 10,
+                tracer: {
+                    color: 0x000000
+                }
+            },
+            sound: "firework_rocket_explode"
         },
         {
             name: "Frag Grenade",
@@ -369,6 +466,34 @@ export const Explosions = ObjectDefinitions.withDefault<ExplosionDefinition>()(
             },
             sound: "frag_grenade",
             decal: "frag_explosion_decal"
+        },
+        {
+            name: "Pumpkin",
+            damage: 100,
+            obstacleMultiplier: 1,
+            radius: {
+                min: 8,
+                max: 25
+            },
+            cameraShake: {
+                duration: 250,
+                intensity: 50
+            },
+            animation: {
+                duration: 1000,
+                tint: 0x91140b,
+                scale: 1.5
+            },
+            sound: "pumpkin_bomb",
+            shrapnelCount: 10,
+            ballistics: {
+                damage: 2,
+                obstacleMultiplier: 1,
+                speed: 0.08,
+                range: 20,
+                rangeVariance: 1,
+                shrapnel: true
+            }
         }
     ].map(def => {
         return {

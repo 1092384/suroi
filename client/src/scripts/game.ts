@@ -1,35 +1,39 @@
+import { GameConstants, InputActions, InventoryMessages, Layer, ObjectCategory, TeamSize } from "@common/constants";
+import { ArmorType } from "@common/definitions/armors";
+import { Badges, type BadgeDefinition } from "@common/definitions/badges";
+import { Emotes } from "@common/definitions/emotes";
+import { type DualGunNarrowing } from "@common/definitions/guns";
+import { Loots } from "@common/definitions/loots";
+import { Scopes } from "@common/definitions/scopes";
+import { DisconnectPacket } from "@common/packets/disconnectPacket";
+import { GameOverPacket } from "@common/packets/gameOverPacket";
+import { JoinedPacket, type JoinedPacketData } from "@common/packets/joinedPacket";
+import { JoinPacket, type JoinPacketCreation } from "@common/packets/joinPacket";
+import { KillFeedPacket } from "@common/packets/killFeedPacket";
+import { MapPacket } from "@common/packets/mapPacket";
+import { type InputPacket, type OutputPacket } from "@common/packets/packet";
+import { PacketStream } from "@common/packets/packetStream";
+import { PickupPacket } from "@common/packets/pickupPacket";
+import { PingPacket } from "@common/packets/pingPacket";
+import { ReportPacket } from "@common/packets/reportPacket";
+import { UpdatePacket, type UpdatePacketDataOut } from "@common/packets/updatePacket";
+import { CircleHitbox } from "@common/utils/hitbox";
+import { adjacentOrEqualLayer } from "@common/utils/layer";
+import { EaseFunctions, Geometry } from "@common/utils/math";
+import { Timeout } from "@common/utils/misc";
+import { ItemType, ObstacleSpecialRoles } from "@common/utils/objectDefinitions";
+import { ObjectPool } from "@common/utils/objectPool";
+import { type ObjectsNetData } from "@common/utils/objectsSerializations";
+import { randomFloat, randomVector } from "@common/utils/random";
+import { Vec, type Vector } from "@common/utils/vector";
 import { sound, type Sound } from "@pixi/sound";
+import $ from "jquery";
 import { Application, Color } from "pixi.js";
 import "pixi.js/prepare";
-import { InputActions, InventoryMessages, Layer, ObjectCategory, TeamSize } from "../../../common/src/constants";
-import { ArmorType } from "../../../common/src/definitions/armors";
-import { Badges, type BadgeDefinition } from "../../../common/src/definitions/badges";
-import { Emotes } from "../../../common/src/definitions/emotes";
-import { type DualGunNarrowing } from "../../../common/src/definitions/guns";
-import { Loots } from "../../../common/src/definitions/loots";
-import { Scopes } from "../../../common/src/definitions/scopes";
-import { DisconnectPacket } from "../../../common/src/packets/disconnectPacket";
-import { GameOverPacket } from "../../../common/src/packets/gameOverPacket";
-import { JoinedPacket, type JoinedPacketData } from "../../../common/src/packets/joinedPacket";
-import { JoinPacket, type JoinPacketCreation } from "../../../common/src/packets/joinPacket";
-import { KillFeedPacket } from "../../../common/src/packets/killFeedPacket";
-import { MapPacket } from "../../../common/src/packets/mapPacket";
-import { type InputPacket, type OutputPacket } from "../../../common/src/packets/packet";
-import { PacketStream } from "../../../common/src/packets/packetStream";
-import { PickupPacket } from "../../../common/src/packets/pickupPacket";
-import { PingPacket } from "../../../common/src/packets/pingPacket";
-import { ReportPacket } from "../../../common/src/packets/reportPacket";
-import { UpdatePacket, type UpdatePacketDataOut } from "../../../common/src/packets/updatePacket";
-import { CircleHitbox } from "../../../common/src/utils/hitbox";
-import { adjacentOrEqualLayer } from "../../../common/src/utils/layer";
-import { EaseFunctions, Geometry } from "../../../common/src/utils/math";
-import { Timeout } from "../../../common/src/utils/misc";
-import { ItemType, ObstacleSpecialRoles } from "../../../common/src/utils/objectDefinitions";
-import { ObjectPool } from "../../../common/src/utils/objectPool";
-import { type ObjectsNetData } from "../../../common/src/utils/objectsSerializations";
 import { getTranslatedString, initTranslation } from "../translations";
+import { type TranslationKeys } from "../typings/translations";
 import { InputManager } from "./managers/inputManager";
-import { /* GameSound, */ SoundManager } from "./managers/soundManager";
+import { GameSound, SoundManager } from "./managers/soundManager";
 import { UIManager } from "./managers/uiManager";
 import { Building } from "./objects/building";
 import { Bullet } from "./objects/bullet";
@@ -52,8 +56,8 @@ import { autoPickup, resetPlayButtons, setUpUI, teamSocket, unlockPlayButtons, u
 import { setUpCommands } from "./utils/console/commands";
 import { defaultClientCVars } from "./utils/console/defaultClientCVars";
 import { GameConsole } from "./utils/console/gameConsole";
-import { COLORS, LAYER_TRANSITION_DELAY, MODE, PIXI_SCALE, UI_DEBUG_MODE, emoteSlots } from "./utils/constants";
-import { loadTextures } from "./utils/pixi";
+import { COLORS, EMOTE_SLOTS, LAYER_TRANSITION_DELAY, MODE, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
+import { loadTextures, SuroiSprite } from "./utils/pixi";
 import { Tween } from "./utils/tween";
 
 /* eslint-disable @stylistic/indent */
@@ -95,7 +99,9 @@ export class Game {
     readonly bullets = new Set<Bullet>();
     readonly planes = new Set<Plane>();
 
-   // windAmbientSound!: GameSound;
+    ambience?: GameSound;
+
+    readonly spinningImages = new Map<SuroiSprite, number>();
 
     readonly playerNames = new Map<number, {
         readonly name: string
@@ -141,7 +147,7 @@ export class Game {
     readonly gasRender = new GasRender(PIXI_SCALE);
     readonly gas = new Gas(this);
 
-    readonly music: Sound;
+    music!: Sound;
 
     readonly tweens = new Set<Tween<unknown>>();
 
@@ -154,24 +160,27 @@ export class Game {
     }
 
     private static _instantiated = false;
-    constructor() {
+
+    static async init(): Promise<Game> {
         if (Game._instantiated) {
             throw new Error("Class 'Game' has already been instantiated.");
         }
         Game._instantiated = true;
 
-        this.console.readFromLocalStorage();
-        initTranslation(this);
-        this.inputManager.setupInputs();
+        const game = new Game();
+
+        game.console.readFromLocalStorage();
+        await initTranslation(game);
+        game.inputManager.setupInputs();
 
         const initPixi = async(): Promise<void> => {
-            const renderMode = this.console.getBuiltInCVar("cv_renderer");
-            const renderRes = this.console.getBuiltInCVar("cv_renderer_res");
+            const renderMode = game.console.getBuiltInCVar("cv_renderer");
+            const renderRes = game.console.getBuiltInCVar("cv_renderer_res");
 
-            await this.pixi.init({
+            await game.pixi.init({
                 resizeTo: window,
                 background: COLORS.grass,
-                antialias: this.console.getBuiltInCVar("cv_antialias"),
+                antialias: game.console.getBuiltInCVar("cv_antialias"),
                 autoDensity: true,
                 preferWebGLVersion: renderMode === "webgl1" ? 1 : 2,
                 preference: renderMode === "webgpu" ? "webgpu" : "webgl",
@@ -188,17 +197,17 @@ export class Game {
                 }
             });
 
-            const pixi = this.pixi;
+            const pixi = game.pixi;
             await loadTextures(
                 pixi.renderer,
-                this.inputManager.isMobile
-                    ? this.console.getBuiltInCVar("mb_high_res_textures")
-                    : this.console.getBuiltInCVar("cv_high_res_textures")
+                game.inputManager.isMobile
+                    ? game.console.getBuiltInCVar("mb_high_res_textures")
+                    : game.console.getBuiltInCVar("cv_high_res_textures")
             );
 
             // HACK: the game ui covers the canvas
             // so send pointer events manually to make clicking to spectate players work
-            this.uiManager.ui.gameUi[0].addEventListener("pointerdown", e => {
+            game.uiManager.ui.gameUi[0].addEventListener("pointerdown", e => {
                 pixi.canvas.dispatchEvent(new PointerEvent("pointerdown", {
                     pointerId: e.pointerId,
                     button: e.button,
@@ -209,45 +218,46 @@ export class Game {
                 }));
             });
 
-            pixi.ticker.add(this.render.bind(this));
+            pixi.ticker.add(game.render.bind(game));
             pixi.stage.addChild(
-                this.camera.container,
-                this.map.container,
-                this.map.mask
+                game.camera.container,
+                game.map.container,
+                game.map.mask
             );
 
-            this.map.visible = !this.console.getBuiltInCVar("cv_minimap_minimized");
-            this.map.expanded = this.console.getBuiltInCVar("cv_map_expanded");
-            this.uiManager.ui.gameUi.toggle(this.console.getBuiltInCVar("cv_draw_hud"));
+            game.map.visible = !game.console.getBuiltInCVar("cv_minimap_minimized");
+            game.map.expanded = game.console.getBuiltInCVar("cv_map_expanded");
+            game.uiManager.ui.gameUi.toggle(game.console.getBuiltInCVar("cv_draw_hud"));
 
-            pixi.renderer.on("resize", () => this.resize());
-            this.resize();
+            pixi.renderer.on("resize", () => game.resize());
+            game.resize();
 
             setInterval(() => {
-                if (this.console.getBuiltInCVar("pf_show_fps")) {
-                    this.uiManager.debugReadouts.fps.text(`${Math.round(this.pixi.ticker.FPS)} fps`);
+                if (game.console.getBuiltInCVar("pf_show_fps")) {
+                    game.uiManager.debugReadouts.fps.text(`${Math.round(game.pixi.ticker.FPS)} fps`);
                 }
             }, 500);
         };
 
         void Promise.all([
             initPixi(),
-            setUpUI(this)
+            setUpUI(game)
         ]).then(() => {
             unlockPlayButtons();
             resetPlayButtons();
         });
 
-        setUpCommands(this);
-        this.inputManager.generateBindsConfigScreen();
+        setUpCommands(game);
+        game.inputManager.generateBindsConfigScreen();
 
-        this.music = sound.add("menu_music", {
-            url: `./audio/music/menu_music${this.console.getBuiltInCVar("cv_use_old_menu_music") ? "_old" : MODE.specialMenuMusic ? `_${MODE.idString}` : ""}.mp3`,
+        game.music = sound.add("menu_music", {
+            url: `./audio/music/menu_music${game.console.getBuiltInCVar("cv_use_old_menu_music") ? "_old" : MODE.specialMenuMusic ? `_${GameConstants.modeName}` : ""}.mp3`,
             singleInstance: true,
             preload: true,
             autoPlay: true,
-            volume: this.console.getBuiltInCVar("cv_music_volume")
+            volume: game.console.getBuiltInCVar("cv_music_volume")
         });
+        return game;
     }
 
     resize(): void {
@@ -264,7 +274,9 @@ export class Game {
         this._socket.binaryType = "arraybuffer";
 
         this._socket.onopen = (): void => {
-            this.music.stop();
+            if (this.music) {
+                this.music.stop();
+            }
             this.gameStarted = true;
             this.gameOver = false;
             this.spectating = false;
@@ -297,7 +309,7 @@ export class Game {
                         : skin
                 ),
                 badge: Badges.fromStringSafe(this.console.getBuiltInCVar("cv_loadout_badge")),
-                emotes: emoteSlots.map(
+                emotes: EMOTE_SLOTS.map(
                     slot => Emotes.fromStringSafe(this.console.getBuiltInCVar(`cv_loadout_${slot}_emote`))
                 )
             };
@@ -306,6 +318,45 @@ export class Game {
 
             this.camera.addObject(this.gasRender.graphics);
             this.map.indicator.setFrame("player_indicator");
+
+            const particleEffects = MODE.particleEffects;
+
+            if (particleEffects !== undefined) {
+                const This = this;
+                const gravityOn = particleEffects.gravity;
+                this.particleManager.addEmitter(
+                    {
+                        delay: particleEffects.delay,
+                        active: this.console.getBuiltInCVar("cv_ambient_particles"),
+                        spawnOptions: () => ({
+                            frames: particleEffects.frames,
+                            get position(): Vector {
+                                const width = This.camera.width / PIXI_SCALE;
+                                const height = This.camera.height / PIXI_SCALE;
+                                const player = This.activePlayer;
+                                if (!player) return Vec.create(0, 0);
+                                const { x, y } = player.position;
+                                return randomVector(x - width, x + width, y - height, y + height);
+                            },
+                            speed: randomVector(-10, 10, gravityOn ? 10 : -10, 10),
+                            lifetime: randomFloat(12000, 50000),
+                            zIndex: Number.MAX_SAFE_INTEGER - 5,
+                            alpha: {
+                                start: this.layer === Layer.Ground ? 0.7 : 0,
+                                end: 0
+                            },
+                            rotation: {
+                                start: randomFloat(0, 36),
+                                end: randomFloat(40, 80)
+                            },
+                            scale: {
+                                start: randomFloat(0.8, 1.1),
+                                end: randomFloat(0.7, 0.8)
+                            }
+                        })
+                    }
+                );
+            }
         };
 
         // Handle incoming messages
@@ -392,18 +443,16 @@ export class Game {
             case packet instanceof PickupPacket: {
                 const { output: { message, item } } = packet;
 
-                const inventoryMessageMap = {
-                    [InventoryMessages.NotEnoughSpace]: "msg_not_enough_space",
-                    [InventoryMessages.ItemAlreadyEquipped]: "msg_item_already_equipped",
-                    [InventoryMessages.BetterItemEquipped]: "msg_better_item_equipped",
-                    [InventoryMessages.CannotUseRadio]: "msg_cannot_use_radio"
-                };
-
                 if (message !== undefined) {
                     const inventoryMsg = this.uiManager.ui.inventoryMsg;
-                    inventoryMsg.text(getTranslatedString(inventoryMessageMap[message])).fadeIn(250);
+
+                    inventoryMsg.text(getTranslatedString(this._inventoryMessageMap[message])).fadeIn(250);
+                    if (message === InventoryMessages.RadioOverused) {
+                        this.soundManager.play("metal_light_destroyed");
+                    }
+
                     clearTimeout(this.inventoryMsgTimeout);
-                    this.inventoryMsgTimeout = setTimeout(() => inventoryMsg.fadeOut(250), 2500) as unknown as number;
+                    this.inventoryMsgTimeout = window.setTimeout(() => inventoryMsg.fadeOut(250), 2500);
                 } else if (item !== undefined) {
                     let soundID: string;
                     switch (item.itemType) {
@@ -426,12 +475,17 @@ export class Game {
                         case ItemType.Throwable:
                             soundID = "throwable_pickup";
                             break;
+                        case ItemType.Perk:
+                            soundID = "pickup";
+                            break;
                         default:
                             soundID = "pickup";
                             break;
                     }
 
                     this.soundManager.play(soundID);
+                } else {
+                    console.warn("Unexpected PickupPacket with neither message nor item");
                 }
                 break;
             }
@@ -441,12 +495,22 @@ export class Game {
         }
     }
 
+    private readonly _inventoryMessageMap: Record<InventoryMessages, TranslationKeys> = {
+        [InventoryMessages.NotEnoughSpace]: "msg_not_enough_space",
+        [InventoryMessages.ItemAlreadyEquipped]: "msg_item_already_equipped",
+        [InventoryMessages.BetterItemEquipped]: "msg_better_item_equipped",
+        [InventoryMessages.CannotUseRadio]: "msg_cannot_use_radio",
+        [InventoryMessages.RadioOverused]: "msg_radio_overused"
+    };
+
     startGame(packet: JoinedPacketData): void {
         // Sound which notifies the player that the
         // game started if page is out of focus.
         if (!document.hasFocus()) this.soundManager.play("join_notification");
 
-       // this.windAmbientSound = this.soundManager.play("wind_ambience", { loop: true });
+        if (MODE.ambience) {
+            this.ambience = this.soundManager.play(MODE.ambience, { loop: true, ambient: true });
+        }
 
         this.uiManager.emotes = packet.emotes;
         this.uiManager.updateEmoteWheel();
@@ -476,8 +540,9 @@ export class Game {
             this.soundManager.stopAll();
 
             ui.splashUi.fadeIn(400, () => {
-                void this.music.play();
-
+                if (this.music) {
+                    void this.music.play();
+                }
                 ui.teamContainer.html("");
                 ui.actionContainer.hide();
                 ui.gameMenu.hide();
@@ -553,8 +618,9 @@ export class Game {
             }
         }
 
+        let players: Set<Player> | undefined;
         if (this.console.getBuiltInCVar("cv_movement_smoothing")) {
-            for (const player of this.objects.getCategory(ObjectCategory.Player)) {
+            for (const player of players = this.objects.getCategory(ObjectCategory.Player)) {
                 player.updateContainerPosition();
                 if (!player.isActivePlayer || !this.console.getBuiltInCVar("cv_responsive_rotation") || this.spectating) {
                     player.updateContainerRotation();
@@ -579,6 +645,14 @@ export class Game {
                 syncedParticle.updateContainerRotation();
                 syncedParticle.updateContainerScale();
             }
+        }
+
+        for (const player of players ?? this.objects.getCategory(ObjectCategory.Player)) {
+            player.updateGrenadePreview();
+        }
+
+        for (const [image, spinSpeed] of this.spinningImages.entries()) {
+            image.rotation += spinSpeed * delta;
         }
 
         for (const tween of this.tweens) tween.update();
@@ -622,7 +696,10 @@ export class Game {
         }
 
         const playerData = updateData.playerData;
-        if (playerData) this.uiManager.updateUI(playerData);
+        if (playerData) {
+            this.uiManager.updateUI(playerData);
+            this.uiManager.updateWeaponSlots(); // to load reskins
+        }
 
         for (const deletedPlayerId of updateData.deletedPlayers ?? []) {
             this.playerNames.delete(deletedPlayerId);
@@ -645,13 +722,9 @@ export class Game {
 
                     // Yes, we need to do this specifically for building ceilings as well.
                     if (_object.isBuilding) {
+                        _object.ceilingVisible = false;
                         _object.ceilingContainer.alpha = 0;
-                        this.addTween({
-                            target: _object.ceilingContainer,
-                            to: { alpha: 1 },
-                            duration: LAYER_TRANSITION_DELAY,
-                            ease: EaseFunctions.sineIn
-                        });
+                        _object.toggleCeiling(LAYER_TRANSITION_DELAY);
                     }
 
                     this.addTween({
@@ -688,7 +761,7 @@ export class Game {
                 object.container.alpha = 1;
 
                 // Yes, we need to do this specifically for building ceilings as well.
-                if (object.isBuilding) {
+                if (object.isBuilding && object.ceilingVisible) {
                     object.ceilingContainer.alpha = 1;
                     this.addTween({
                         target: object.ceilingContainer,
@@ -726,7 +799,7 @@ export class Game {
             if (this.console.getBuiltInCVar("cv_hide_emotes")) break;
             const player = this.objects.get(emote.playerID);
             if (player?.isPlayer) {
-                player.sendEmote(emote.definition);
+                player.showEmote(emote.definition);
             } else {
                 console.warn(`Tried to emote on behalf of ${player === undefined ? "a non-existant player" : `a/an ${ObjectCategory[player.type]}`}`);
                 continue;
@@ -785,6 +858,8 @@ export class Game {
             },
             duration: LAYER_TRANSITION_DELAY
         });
+
+        this.ambience?.setPaused(layer < Layer.Ground);
     }
 
     // yes this might seem evil. but the two local variables really only need to
@@ -824,6 +899,9 @@ export class Game {
             bind?: string
         } = {};
 
+        // keep image thingy around to consult (and therefore lazily change) src
+        let detonateBindIcon: JQuery<HTMLImageElement> | undefined;
+
         return () => {
             if (!this.gameStarted || (this.gameOver && !this.spectating)) return;
             this.inputManager.update();
@@ -853,7 +931,7 @@ export class Game {
                 object: undefined,
                 dist: Number.MAX_VALUE
             };
-            const detectionHitbox = new CircleHitbox(3, player.position);
+            const detectionHitbox = new CircleHitbox(3 * player.sizeMod, player.position);
 
             for (const object of this.objects) {
                 const { isLoot, isObstacle, isPlayer, isBuilding } = object;
@@ -930,15 +1008,21 @@ export class Game {
                                             : getTranslatedString("action_close_door");
                                         break;
                                     case ObstacleSpecialRoles.Activatable:
-                                        text = getTranslatedString(`interact_${object.definition.idString}`);
+                                        text = getTranslatedString(`interact_${object.definition.idString}` as TranslationKeys);
                                         break;
                                 }
                                 break;
                             }
                             case object?.isLoot: {
-                                text = `${object.definition.idString.startsWith("dual_")
-                                    ? getTranslatedString("dual_template", { gun: getTranslatedString(object.definition.idString.slice("dual_".length)) })
-                                    : getTranslatedString(object.definition.idString)}${object.count > 1 ? ` (${object.count})` : ""}`;
+                                const definition = object.definition;
+                                const itemName = definition.itemType === ItemType.Gun && definition.isDual
+                                    ? getTranslatedString(
+                                        "dual_template",
+                                        { gun: getTranslatedString(definition.singleVariant as TranslationKeys) }
+                                    )
+                                    : getTranslatedString(definition.idString as TranslationKeys);
+
+                                text = `${itemName}${object.count > 1 ? ` (${object.count})` : ""}`;
                                 break;
                             }
                             case object?.isPlayer: {
@@ -977,11 +1061,13 @@ export class Game {
                     }
 
                     if (
-                        !player.downed
-                        && (!object?.isObstacle
+                        (!object?.isObstacle
                             || !object.definition.isActivatable
                             || !object.definition.noInteractMessage)
-                    ) interactMsg.show();
+                    ) {
+                        interactMsg.show();
+                        if (player.downed && (object?.isLoot || (object?.isObstacle && object.definition.noInteractMessage))) interactMsg.hide();
+                    }
                 } else {
                     interactMsg.hide();
                 }
@@ -1011,6 +1097,9 @@ export class Game {
 
                                     // Don't pick up skins
                                     && type !== ItemType.Skin
+
+                                    // Don't pick up perks
+                                    && type !== ItemType.Perk
                                 )
                             ) || (
                                 type === ItemType.Gun
@@ -1051,6 +1140,7 @@ export class Game {
             }
 
             // funny detonate button stuff
+            const detonateKey = this.uiManager.ui.detonateKey;
             if (!this.inputManager.isMobile) {
                 const boomBind: string | undefined = this.inputManager.binds.getInputsBoundToAction("explode_c4")[0];
 
@@ -1060,17 +1150,29 @@ export class Game {
                     if (boomBind !== undefined) {
                         const bindImg = InputManager.getIconFromInputName(boomBind);
 
+                        detonateKey.show();
+
                         if (bindImg === undefined) {
-                            this.uiManager.ui.detonateKey.show().text(boomBind ?? "");
+                            detonateKey.text(boomBind ?? "");
+                            if (detonateBindIcon !== undefined) {
+                                detonateKey.empty();
+                                detonateBindIcon = undefined;
+                            }
                         } else {
-                            this.uiManager.ui.detonateKey.show().html(`<img src="${bindImg}" alt="${boomBind}"/>`);
+                            if (detonateBindIcon === undefined) {
+                                detonateKey.children().add(detonateBindIcon = $(`<img src="${bindImg}" alt=${boomBind} />`));
+                            }
+
+                            if (detonateBindIcon.attr("src") !== bindImg) {
+                                detonateBindIcon.attr("src", bindImg);
+                            }
                         }
                     } else {
-                        this.uiManager.ui.detonateKey.hide();
+                        detonateKey.hide();
                     }
                 }
             } else {
-                this.uiManager.ui.detonateKey.hide();
+                detonateKey.hide();
             }
         };
     })();

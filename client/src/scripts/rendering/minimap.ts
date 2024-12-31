@@ -1,19 +1,18 @@
+import { GameConstants, GasState, Layer, ObjectCategory, ZIndexes } from "@common/constants";
+import { type MapPingDefinition } from "@common/definitions/mapPings";
+import { type MapPacketData } from "@common/packets/mapPacket";
+import { type PingSerialization, type PlayerPingSerialization } from "@common/packets/updatePacket";
+import { RectangleHitbox } from "@common/utils/hitbox";
+import { Numeric } from "@common/utils/math";
+import { FloorTypes, River, Terrain } from "@common/utils/terrain";
+import { Vec, type Vector } from "@common/utils/vector";
 import $ from "jquery";
 import { Container, Graphics, RenderTexture, Sprite, Text, isMobile, type ColorSource, type Texture } from "pixi.js";
-import { GameConstants, GasState, Layer, ObjectCategory, ZIndexes } from "../../../../common/src/constants";
-import { type MapPingDefinition } from "../../../../common/src/definitions/mapPings";
-import { type MapPacketData } from "../../../../common/src/packets/mapPacket";
-import { type PingSerialization, type PlayerPingSerialization } from "../../../../common/src/packets/updatePacket";
-import { RectangleHitbox } from "../../../../common/src/utils/hitbox";
-import { Numeric } from "../../../../common/src/utils/math";
-import { FloorTypes, River, Terrain } from "../../../../common/src/utils/terrain";
-import { Vec, type Vector } from "../../../../common/src/utils/vector";
 import { getTranslatedString } from "../../translations";
 import { type Game } from "../game";
 import { COLORS, DIFF_LAYER_HITBOX_OPACITY, FOOTSTEP_HITBOX_LAYER, HITBOX_DEBUG_MODE, PIXI_SCALE, TEAMMATE_COLORS } from "../utils/constants";
 import { SuroiSprite, drawGroundGraphics, drawHitbox, toPixiCoords } from "../utils/pixi";
 import { GasRender } from "./gas";
-import { getEffectiveZIndex } from "../../../../common/src/utils/layer";
 
 export class Minimap {
     private _expanded = false;
@@ -174,15 +173,18 @@ export class Minimap {
         }
 
         // river bank needs to be draw first
-        ctx.beginPath();
         for (const river of this._terrain.rivers) {
-            ctx.roundShape(getRiverPoly(river.bankHitbox.points), 0, true);
+            ctx
+                .beginPath()
+                .roundShape(getRiverPoly(river.bankHitbox.points), 0, true)
+                .fill(river.isTrail ? COLORS.trail : COLORS.riverBank);
         }
-        ctx.fill(COLORS.riverBank);
 
         ctx.beginPath();
         for (const river of this._terrain.rivers) {
-            ctx.roundShape(getRiverPoly(river.waterHitbox.points), 0, true);
+            if (river.waterHitbox) {
+                ctx.roundShape(getRiverPoly(river.waterHitbox.points), 0, true);
+            }
         }
         ctx.fill(COLORS.water);
 
@@ -390,7 +392,7 @@ export class Minimap {
         for (const river of this._terrain.rivers) {
             const points = river.points.map(point => Vec.scale(point, PIXI_SCALE));
 
-            drawHitbox(river.waterHitbox, FloorTypes.water.debugColor, debugGraphics);
+            if (river.waterHitbox) drawHitbox(river.waterHitbox, FloorTypes.water.debugColor, debugGraphics);
             drawHitbox(river.bankHitbox, FloorTypes.sand.debugColor, debugGraphics);
 
             debugGraphics.setStrokeStyle({
@@ -431,7 +433,7 @@ export class Minimap {
         );
 
         const rivers: River[] = [];
-        rivers.push(...mapPacket.rivers.map(({ width, points }) => new River(width, points, rivers, mapBounds)));
+        rivers.push(...mapPacket.rivers.map(({ width, points, isTrail }) => new River(width, points, rivers, mapBounds, isTrail)));
 
         this._terrain = new Terrain(
             width,
@@ -550,7 +552,7 @@ export class Minimap {
         if (this._expanded) {
             const screenWidth = window.innerWidth;
             const screenHeight = window.innerHeight;
-            const smallestDim = Math.min(screenHeight, screenWidth);
+            const smallestDim = Numeric.min(screenHeight, screenWidth);
             this.container.scale.set(smallestDim / this._height);
             // noinspection JSSuspiciousNameCombination
             this._minimapWidth = this.sprite.width * this.container.scale.x;
@@ -558,7 +560,7 @@ export class Minimap {
             this._margins = Vec.create(screenWidth / 2 - (this._minimapWidth / 2), screenHeight / 2 - (this._minimapHeight / 2));
 
             const closeButton = $("#btn-close-minimap");
-            const closeButtonPos = Math.min(
+            const closeButtonPos = Numeric.min(
                 this._margins.x + this._minimapWidth + 16,
                 screenWidth - (closeButton.outerWidth() ?? 0)
             ) / uiScale;
@@ -754,9 +756,7 @@ export class MapPing {
         this.color = definition.color;
 
         if (definition.isPlayerPing && playerId) {
-            this.color = TEAMMATE_COLORS[
-                game.uiManager.teammates.findIndex(({ id }) => id === playerId) + 1
-            ];
+            this.color = TEAMMATE_COLORS[this.game.uiManager.getTeammateColorIndex(playerId) ?? game.uiManager.teammates.findIndex(({ id }) => id === playerId)];
         }
 
         this.mapImage = new SuroiSprite(definition.idString)
@@ -768,7 +768,7 @@ export class MapPing {
             this.inGameImage = new SuroiSprite(definition.idString)
                 .setVPos(toPixiCoords(position))
                 .setTint(this.color)
-                .setZIndex(getEffectiveZIndex(ZIndexes.Gas + 1, Layer.Floor1, game.layer)); // todo: better logic for this
+                .setZIndex(995);
         }
     }
 

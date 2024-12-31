@@ -1,4 +1,4 @@
-import { Layer } from "../constants";
+import { GameConstants, Layer } from "../constants";
 import { PolygonHitbox, RectangleHitbox, type Hitbox } from "./hitbox";
 import { Collision, Numeric } from "./math";
 import { SeededRandom } from "./random";
@@ -51,6 +51,38 @@ export const FloorTypes: Record<FloorNames, FloorDefinition> = {
         debugColor: 0x77390d
     }
 };
+
+function jaggedRectangle(
+    hitbox: RectangleHitbox,
+    spacing: number,
+    variation: number,
+    random: SeededRandom
+): Vector[] {
+    const topLeft = Vec.clone(hitbox.min);
+    const topRight = Vec.create(hitbox.max.x, hitbox.min.y);
+    const bottomRight = Vec.clone(hitbox.max);
+    const bottomLeft = Vec.create(hitbox.min.x, hitbox.max.y);
+
+    const points: Vector[] = [];
+
+    variation = variation / 2;
+    const getVariation = (): number => random.get(-variation, variation);
+
+    for (let x = topLeft.x + spacing; x < topRight.x; x += spacing) {
+        points.push(Vec.create(x, topLeft.y + getVariation()));
+    }
+    for (let y = topRight.y + spacing; y < bottomRight.y; y += spacing) {
+        points.push(Vec.create(topRight.x + getVariation(), y));
+    }
+    for (let x = bottomRight.x - spacing; x > bottomLeft.x; x -= spacing) {
+        points.push(Vec.create(x, bottomRight.y + getVariation()));
+    }
+    for (let y = bottomLeft.y - spacing; y > topLeft.y; y -= spacing) {
+        points.push(Vec.create(bottomLeft.x + getVariation(), y));
+    }
+
+    return points;
+}
 
 export class Terrain {
     readonly width: number;
@@ -172,7 +204,8 @@ export class Terrain {
                 floor = FloorNames.Sand;
 
                 if (this.grassHitbox.isPointInside(position)) {
-                    floor = FloorNames.Grass;
+                    // adding a property wont work for some reason in the mode def
+                    floor = GameConstants.modeName === "winter" ? FloorNames.Sand : FloorNames.Grass;
                 }
             }
         }
@@ -186,7 +219,7 @@ export class Terrain {
                     floor = FloorNames.Sand;
                 }
 
-                if (river.waterHitbox.isPointInside(position)) {
+                if (river.waterHitbox?.isPointInside(position)) {
                     floor = FloorNames.Water;
                     break;
                 }
@@ -251,21 +284,38 @@ function catmullRom(t: number, p0: number, p1: number, p2: number, p3: number): 
     return 0.5 * (2 * p1 + t * (p2 - p0) + tSquared * (2 * p0 - 5 * p1 + 4 * p2 - p3) + tSquared * t * (3 * p1 - 3 * p2 + p3 - p0));
 }
 
+function clipRayToPoly(point: Vector, direction: Vector, polygon: PolygonHitbox): Vector {
+    const end = Vec.add(point, direction);
+    if (!polygon.isPointInside(end)) {
+        const t = Collision.rayIntersectsPolygon(point, direction, polygon.points);
+        if (t) {
+            return Vec.scale(direction, t);
+        }
+    }
+    return direction;
+}
+
 export class River {
     readonly bankWidth: number;
 
-    readonly waterHitbox: PolygonHitbox;
+    readonly waterHitbox?: PolygonHitbox;
     readonly bankHitbox: PolygonHitbox;
+
+    readonly isTrail: boolean;
 
     constructor(
         readonly width: number,
         readonly points: readonly Vector[],
         otherRivers: readonly River[],
-        bounds: RectangleHitbox
+        bounds: RectangleHitbox,
+        isTrail: boolean
     ) {
+        this.isTrail = isTrail;
+        const isRiver = !isTrail;
+
         const length = this.points.length - 1;
 
-        this.bankWidth = Numeric.clamp(this.width * 0.75, 12, 20);
+        this.bankWidth = isRiver ? Numeric.clamp(this.width * 0.75, 12, 20) : this.width;
 
         const waterPoints: Vector[] = new Array<Vector>(length * 2);
         const bankPoints: Vector[] = new Array<Vector>(length * 2);
@@ -281,6 +331,7 @@ export class River {
             // find closest colliding river to adjust the bank width and clip this river
             let collidingRiver: River | null = null;
             for (const river of otherRivers) {
+                if (river.isTrail !== isTrail) continue;
                 const length = Vec.length(
                     Vec.sub(
                         river.getPosition(river.getClosestT(current)),
@@ -289,7 +340,7 @@ export class River {
                 );
 
                 if (length < river.width * 2) {
-                    bankWidth = Math.max(bankWidth, river.bankWidth);
+                    bankWidth = Numeric.max(bankWidth, river.bankWidth);
                 }
 
                 if ((i === 0 || i === this.points.length - 1) && length < 48) {
@@ -299,51 +350,33 @@ export class River {
 
             let width = this.width;
 
-            const end = 2 * (Math.max(1 - i / length, i / length) - 0.5);
+            const end = 2 * (Numeric.max(1 - i / length, i / length) - 0.5);
             // increase river width near map bounds
-            if (i < (this.points.length / 2) || endsOnMapBounds) {
+            if (isRiver && (i < (this.points.length / 2) || endsOnMapBounds)) {
                 width = (1 + end ** 3 * 1.5) * this.width;
             }
 
-            const clipRayToPoly = (point: Vector, direction: Vector, polygon: PolygonHitbox): Vector => {
-                const end = Vec.add(point, direction);
-                if (!polygon.isPointInside(end)) {
-                    const t = Collision.rayIntersectsPolygon(point, direction, polygon.points);
-                    if (t) {
-                        return Vec.scale(direction, t);
-                    }
+            const calculatePoints = (width: number, hitbox: PolygonHitbox | undefined, points: Vector[]): void => {
+                let ray1 = Vec.scale(normal, width);
+                let ray2 = Vec.scale(normal, -width);
+
+                if (hitbox) {
+                    ray1 = clipRayToPoly(current, ray1, hitbox);
+                    ray2 = clipRayToPoly(current, ray2, hitbox);
                 }
-                return direction;
+
+                points[i] = Vec.add(current, ray1);
+                points[this.points.length + length - i] = Vec.add(current, ray2);
             };
 
-            const finalBankWidth = width + bankWidth;
-
-            let waterRay1 = Vec.scale(normal, width);
-            let waterRay2 = Vec.scale(normal, -width);
-            let bankRay1 = Vec.scale(normal, finalBankWidth);
-            let bankRay2 = Vec.scale(normal, -finalBankWidth);
-
-            if (collidingRiver) {
-                waterRay1 = clipRayToPoly(current, waterRay1, collidingRiver.waterHitbox);
-                waterRay2 = clipRayToPoly(current, waterRay2, collidingRiver.waterHitbox);
-                bankRay1 = clipRayToPoly(current, bankRay1, collidingRiver.bankHitbox);
-                bankRay2 = clipRayToPoly(current, bankRay2, collidingRiver.bankHitbox);
+            if (isRiver) {
+                calculatePoints(width, collidingRiver?.waterHitbox, waterPoints);
             }
 
-            const waterPoint1 = Vec.add(current, waterRay1);
-            const waterPoint2 = Vec.add(current, waterRay2);
-
-            waterPoints[i] = waterPoint1;
-            waterPoints[this.points.length + length - i] = waterPoint2;
-
-            const bankPoint1 = Vec.add(current, bankRay1);
-            const bankPoint2 = Vec.add(current, bankRay2);
-
-            bankPoints[i] = bankPoint1;
-            bankPoints[this.points.length + length - i] = bankPoint2;
+            calculatePoints(width + bankWidth, collidingRiver?.bankHitbox, bankPoints);
         }
 
-        this.waterHitbox = new PolygonHitbox(waterPoints);
+        this.waterHitbox = isRiver ? new PolygonHitbox(waterPoints) : undefined;
         this.bankHitbox = new PolygonHitbox(bankPoints);
     }
 
@@ -443,36 +476,4 @@ export class River {
 
         return nearestT;
     }
-}
-
-function jaggedRectangle(
-    hitbox: RectangleHitbox,
-    spacing: number,
-    variation: number,
-    random: SeededRandom
-): Vector[] {
-    const topLeft = Vec.clone(hitbox.min);
-    const topRight = Vec.create(hitbox.max.x, hitbox.min.y);
-    const bottomRight = Vec.clone(hitbox.max);
-    const bottomLeft = Vec.create(hitbox.min.x, hitbox.max.y);
-
-    const points: Vector[] = [];
-
-    variation = variation / 2;
-    const getVariation = (): number => random.get(-variation, variation);
-
-    for (let x = topLeft.x + spacing; x < topRight.x; x += spacing) {
-        points.push(Vec.create(x, topLeft.y + getVariation()));
-    }
-    for (let y = topRight.y + spacing; y < bottomRight.y; y += spacing) {
-        points.push(Vec.create(topRight.x + getVariation(), y));
-    }
-    for (let x = bottomRight.x - spacing; x > bottomLeft.x; x -= spacing) {
-        points.push(Vec.create(x, bottomRight.y + getVariation()));
-    }
-    for (let y = bottomLeft.y - spacing; y > topLeft.y; y -= spacing) {
-        points.push(Vec.create(bottomLeft.x + getVariation(), y));
-    }
-
-    return points;
 }
