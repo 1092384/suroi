@@ -2396,7 +2396,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 ammoSpawnAmount: 90,
                 capacity: 69,
                 reloadTime: 26,
-                fireDelay: 400,
+                fireDelay: 90,
                 switchDelay: 400,
                 recoilMultiplier: 0.75,
                 recoilDuration: 150,
@@ -2420,11 +2420,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                     damage: 100,
                     obstacleMultiplier: 1.5,
                     speed: 0.26,
-                    range: 160,
-                    tracer: {
-                        width: 2.5,
-                        length: 4
-                    }
+                    range: 160
                 }
             }
         ] satisfies ReadonlyArray<RawDefinition<RawGunDefinition>>).map(e => {
