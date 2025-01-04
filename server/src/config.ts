@@ -36,6 +36,8 @@ export const Config = {
 
     plugins: [],
 
+    disableLobbyClearing: true,
+
     roles: {
         developr: { password: "developr", isDev: true },
         designr: { password: "designr" },
@@ -130,6 +132,11 @@ export interface ConfigType {
     }
 
     /**
+     * Whether to start the game as soon as joining (debug feature, also disables winning when 1 player is remaining for obvious reasons).
+     */
+    readonly startImmediately?: boolean
+
+    /**
      * The maximum number of players allowed to join a game.
      */
     readonly maxPlayersPerGame: number
@@ -222,7 +229,7 @@ export interface ConfigType {
         /**
          * If a player's username matches one of the regexes in this array, it will be replaced with the default username.
          */
-        readonly usernameFilters?: RegExp[]
+        readonly usernameFilters?: readonly RegExp[]
 
         /**
          * If specified, the proxycheck.io API will be used to detect and block VPNs and proxies.
